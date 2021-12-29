@@ -1,0 +1,26 @@
+{
+  "AddonUUID": "4ba5d6f9-6642-4817-af67-c79b68c96977",
+  "AddonVersion": "0.0.0",
+  "DebugPort": 4500,
+  "WebappBaseUrl": "https://app.sandbox.pepperi.com",
+  "DefaultEditor": "main",
+  "Endpoints": [
+    "installation.ts",
+    "api.ts"
+  ],
+  "Editors": [
+    "main"
+  ],
+  "PublishConfig": {
+    "ClientStack": "ng10",
+    "Editors": [
+      {
+        "ParentPackageName": "Slugs",
+        "PackageName": "Slug mapping",
+        "Description": "A list of slugs that can be mapped to pages"
+      }
+    ],
+    "Dependencies": {},
+    "CPISide": []
+  }
+}
