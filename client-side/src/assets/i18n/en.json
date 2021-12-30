@@ -1,3 +1,18 @@
 {
-    "TODO_DETAILS": "Define the todo details"
+    "PAGE_TITLE": "Page Mapping",
+    "SLUGS": "Slugs",
+    "MAPPING": "Mapping",
+    "NO_DATA": "Use the button above to get things going",
+    "SLUGS_TAB": {
+        "NAME": "Name",
+        "DESCRIPTION": "Description",
+        "SLUG": "Slug",
+        "PAGE_TYPE": "Page Type"
+    },
+
+    "ACTIONS": {
+        "CREATE_NEW_SLUG": "Create New Slug",
+        "EDIT": "Edit",
+        "DELETE": "Delete"
+    }
 }

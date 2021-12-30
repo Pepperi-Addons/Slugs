@@ -1,6 +1,6 @@
 <pep-page-layout [addPadding]="false">
     <ng-container pep-top-area>
-        <pep-top-bar title="Manage a list of todo's.">
+        <pep-top-bar title="{{'PAGE_TITLE' | translate}}">
             <div header-start-content>
                 <!-- Add components you want after the title -->
             </div>
@@ -11,8 +11,17 @@
     </ng-container>
 
     <ng-container pep-main-area>
-        <pep-generic-list title="You can create and edit this list here" [allowMultipleSelection]="true" [inline]="true" [dataSource]="listDataSource">
-        </pep-generic-list>
+        <mat-tab-group  #tabGroup class="editor-tabs" animationDuration="0ms">
+            <mat-tab label="{{'SLUGS' | translate}}">
+                <pep-generic-list title="{{'SLUGS' | translate}}" [allowMultipleSelection]="true" 
+                [inline]="true" [dataSource]="slugsDataSource" [firstFieldAsLink]="true" (fieldClicked)="onCustomizeFieldClick($event)"
+                [noDataFoundMsg]="'avner'">
+            </pep-generic-list>
+            </mat-tab>
+            <mat-tab label="{{'MAPPING' | translate}}">
+            </mat-tab>
+        </mat-tab-group>
+        
     </ng-container>
 </pep-page-layout>
 

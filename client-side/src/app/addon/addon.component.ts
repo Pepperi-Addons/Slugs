@@ -30,25 +30,28 @@ export class AddonComponent implements OnInit {
         });
     }
 
-    ngOnInit() {
+    async ngOnInit() {
+        const desktopTitle = await this.translate.get('SLUGS').toPromise();
     }
 
     openDialog() {
         
     }
 
-    listDataSource: GenericListDataSource = {
+    slugsDataSource: GenericListDataSource = {
         getList: async (state) => {
             return [
                 {
-                    Key: 'key1',
-                    Field1: 'Hello',
-                    Field2: true
+                    Key: 'Name',
+                    Name: 'Home Page',
+                    Description: 'Ottawa',
+                    Slug: '/homepage'
                 },
                 {
-                    Key: 'key1',
-                    Field1: 'World',
-                    Field2: false
+                    Key: 'Description',
+                    Name: 'Dashboard',
+                    Description: 'Monterrey',
+                    Slug: '/dashboard'
                 }
             ]
         },
@@ -64,16 +67,23 @@ export class AddonComponent implements OnInit {
                   Title: '',
                   Fields: [
                     {
-                        FieldID: 'Field1',
+                        FieldID: "Name",
                         Type: 'TextBox',
-                        Title: 'Field1',
+                        Title: this.translate.instant("SLUGS_TAB.NAME"),
                         Mandatory: false,
                         ReadOnly: true
                     },
                     {
-                        FieldID: 'Field2',
-                        Type: 'Boolean',
-                        Title: 'Field2',
+                        FieldID: "Description",
+                        Type: 'TextBox',
+                        Title: this.translate.instant("SLUGS_TAB.DESCRIPTION"),
+                        Mandatory: false,
+                        ReadOnly: true
+                    },
+                    {
+                        FieldID: "Slug",
+                        Type: 'TextBox',
+                        Title: this.translate.instant("SLUGS_TAB.SLUG"),
                         Mandatory: false,
                         ReadOnly: true
                     }
@@ -83,7 +93,10 @@ export class AddonComponent implements OnInit {
                       Width: 25
                     },
                     {
-                      Width: 25
+                      Width: 40
+                    },
+                    {
+                      Width: 35
                     }
                   ],
                   FrozenColumnsCount: 0,
@@ -94,7 +107,16 @@ export class AddonComponent implements OnInit {
         getActions: async (objs) =>  {
             return objs.length ? [
                 {
-                    title: this.translate.instant("Edit"),
+                    title: this.translate.instant("ACTIONS.EDIT"),
+                    handler: async (objs) => {
+                        this.router.navigate([objs[0].Key], {
+                            relativeTo: this.route,
+                            queryParamsHandling: 'merge'
+                        });
+                    }
+                },
+                {
+                    title: this.translate.instant("ACTIONS.DELETE"),
                     handler: async (objs) => {
                         this.router.navigate([objs[0].Key], {
                             relativeTo: this.route,
@@ -104,5 +126,9 @@ export class AddonComponent implements OnInit {
                 }
             ] : []
         }
+    }
+
+    onCustomizeFieldClick(event){
+        debugger;
     }
 }
