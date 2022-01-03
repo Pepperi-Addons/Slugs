@@ -12,7 +12,24 @@
 
     "ACTIONS": {
         "CREATE_NEW_SLUG": "Create New Slug",
+        "CREATE_SLUG": "Create Slug",
+        "CANCEL": "Cancel",
         "EDIT": "Edit",
         "DELETE": "Delete"
+    },
+
+    "ADD_SLUG":{
+        "CREATE_NEW_TITLE": "Create a new slug",
+        "EDIT_SLUG": "Edit slug",
+        "DISPLAY_NAME": "Display Name",
+        "DESCRIPTION": "Description",
+        "PAGE_TYPES": "Page type",
+        "SLUG": "Slug",
+        "HOW_TO_SLUG": "How to slug",
+        "USE_HYPHENS": "Use hyphens",
+        "USE_LOWERCASE": "Use lower-case",
+        "INCLUDE_RELEVANT_KEYWORDS": "Include relevant keywords",
+        "KEEP_IT_SHORT": "Keep ot short, 1-5 words",
+        "MAKE_READABLE": "Make them readable"
     }
 }

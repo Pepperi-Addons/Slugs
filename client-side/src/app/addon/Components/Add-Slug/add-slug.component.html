@@ -1,0 +1,32 @@
+<pep-dialog title="{{isModified ? ('ADD_SLUG.EDIT_SLUG'|translate) : ('ADD_SLUG.CREATE_NEW_TITLE' | translate)}}">
+    <ng-container pep-dialog-content>
+        <div class="addSlugCont">
+            <div>
+            <pep-textbox [label]="'ADD_SLUG.DISPLAY_NAME' | translate" [(value)]="slug.name" sizeType="md"></pep-textbox>
+            <pep-textarea [(value)]="slug.description" [label]="'ADD_SLUG.DESCRIPTION' | translate" [disabled]="false" 
+                  rowSpan="1.5">
+            </pep-textarea>
+            <!-- <pep-select [label]="'ADD_SLUG.PAGE_TYPES' | translate" [value]="slug.pageType" [options]="pageTypes" 
+                         [emptyOption]="false" [disabled]="false">
+            </pep-select> -->
+        </div>
+    <div>
+            <pep-textbox [label]="'ADD_SLUG.SLUG' | translate" type="link" [(value)]="slug.slugURL" sizeType="md"></pep-textbox>
+            <div class="ulCont">
+            <span class="body-xs">{{'ADD_SLUG.HOW_TO_SLUG' | translate}}</span>
+            <ul class="body-sm">
+                <li><span>{{'ADD_SLUG.USE_HYPHENS' | translate}}</span></li>
+                <li><span>{{'ADD_SLUG.USE_LOWERCASE' | translate}}</span></li>
+                <li><span>{{'ADD_SLUG.INCLUDE_RELEVANT_KEYWORDS' | translate}}</span></li>
+                <li><span>{{'ADD_SLUG.KEEP_IT_SHORT' | translate}}</span></li>
+                <li><span>{{'ADD_SLUG.MAKE_READABLE' | translate}}</span></li>
+            </ul> 
+        </div>
+        </div>
+        </div>
+    </ng-container>
+    <ng-container pep-dialog-actions>
+        <pep-button [value]="'ACTIONS.CANCEL' | translate" [styleType]="'weak'" sizeType="sm" class="pep-spacing-element" (buttonClick)="close($event);"></pep-button>
+        <pep-button value="{{isModified ? ('ACTIONS.EDIT'|translate) : ('ACTIONS.CREATE_SLUG' | translate)}}"  [styleType]="'strong'" sizeType="sm"  (buttonClick)="createSlug($event);"></pep-button>
+    </ng-container>
+</pep-dialog>

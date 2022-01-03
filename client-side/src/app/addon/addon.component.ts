@@ -1,20 +1,26 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from "@angular/core";
 import { PepLayoutService, PepScreenSizeType } from '@pepperi-addons/ngx-lib';
 import { TranslateService } from '@ngx-translate/core';
-
 import { AddonService } from "../services/addon.service";
-import { GenericListDataSource } from "@pepperi-addons/ngx-composite-lib/generic-list";
+import { GenericListComponent, GenericListDataSource } from "@pepperi-addons/ngx-composite-lib/generic-list";
 import { ActivatedRoute, Router } from "@angular/router";
+import { IPepFormFieldClickEvent } from "@pepperi-addons/ngx-lib/form";
+import { PepDialogActionButton, PepDialogData, PepDialogService } from "@pepperi-addons/ngx-lib/dialog";
+import { AddSlugComponent, ISlug } from '../addon/Components/Add-Slug/add-slug.component';
+import { MatDialogRef } from "@angular/material/dialog";
 
 @Component({
     selector: 'addon-module',
     templateUrl: './addon.component.html',
-    styleUrls: ['./addon.component.scss']
+    styleUrls: ['./addon.component.scss'],
+    providers: [AddSlugComponent]
 })
 export class AddonComponent implements OnInit {
     @Input() hostObject: any;
     
     @Output() hostEvents: EventEmitter<any> = new EventEmitter<any>();
+    
+    @ViewChild(GenericListComponent) slugsList: GenericListComponent;
     
     screenSize: PepScreenSizeType;
 
@@ -23,7 +29,8 @@ export class AddonComponent implements OnInit {
         public router: Router,
         public route: ActivatedRoute,
         public layoutService: PepLayoutService,
-        public translate: TranslateService
+        public translate: TranslateService,
+        public dialogService: PepDialogService
     ) {
         this.layoutService.onResize$.subscribe(size => {
             this.screenSize = size;
@@ -32,10 +39,6 @@ export class AddonComponent implements OnInit {
 
     async ngOnInit() {
         const desktopTitle = await this.translate.get('SLUGS').toPromise();
-    }
-
-    openDialog() {
-        
     }
 
     slugsDataSource: GenericListDataSource = {
@@ -128,7 +131,42 @@ export class AddonComponent implements OnInit {
         }
     }
 
-    onCustomizeFieldClick(event){
-        debugger;
+    addNewSlug(slug: ISlug = null){
+       
+        this.openDialog(AddSlugComponent,(res) => {
+            // TODO - CREATE NEW SLUG
+        }, {'slug': slug,});
+
+    }
+
+    openDialog(comp: any, callBack, data = {}){
+    
+        let config = this.dialogService.getDialogConfig({}, 'inline');
+            config.disableClose = true;
+            config.minWidth = '29rem'; // THE EDIT MODAL WIDTH
+    
+        let dialogRef: MatDialogRef<any> = this.dialogService.openDialog(comp, data, config);
+    
+        dialogRef.afterClosed().subscribe((value) => {
+            if (value !== undefined && value !== null) {
+               callBack(value);
+            }
+        });
+    }
+
+    onCustomizeFieldClick(fieldClickEvent: IPepFormFieldClickEvent){
+        let slug = new ISlug();
+        
+        let retSlug = this.slugsList.dataObjects.find((s) => {
+             return s.UID === fieldClickEvent.id;
+        });
+        
+        slug.name = retSlug.Name;
+        slug.description = retSlug.Description;
+        slug.slugURL = retSlug.Slug;
+
+        this.addNewSlug(slug);
+
+  
     }
 }

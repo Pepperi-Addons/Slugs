@@ -14,8 +14,11 @@
         <mat-tab-group  #tabGroup class="editor-tabs" animationDuration="0ms">
             <mat-tab label="{{'SLUGS' | translate}}">
                 <pep-generic-list title="{{'SLUGS' | translate}}" [allowMultipleSelection]="true" 
-                [inline]="true" [dataSource]="slugsDataSource" [firstFieldAsLink]="true" (fieldClicked)="onCustomizeFieldClick($event)"
+                [inline]="true" [dataSource]="slugsDataSource" [firstFieldAsLink]="true" (fieldClick)="onCustomizeFieldClick($event)"
                 [noDataFoundMsg]="'avner'">
+                <div right-buttons>
+                    <pep-button [value]="'ACTIONS.CREATE_SLUG' | translate" [styleType]="'strong'" sizeType="sm"  (buttonClick)="addNewSlug();"></pep-button>
+                </div>
             </pep-generic-list>
             </mat-tab>
             <mat-tab label="{{'MAPPING' | translate}}">

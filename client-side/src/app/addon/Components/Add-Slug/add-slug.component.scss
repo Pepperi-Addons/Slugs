@@ -1,0 +1,26 @@
+@import '~@pepperi-addons/ngx-lib/theming';
+//@import 'ngx-lib/src/core/style/abstracts/variables';
+//@import 'ngx-lib/src/core/style/abstracts/mixins';
+@include pepperi-theme();
+// Get the theme object.
+$pepperi-theme: get-pepperi-theme();
+
+.addSlugCont{
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+}
+
+.ulCont{
+        color: get-pep-color($pepperi-theme, color-text, color-dimmed);
+
+        ul{
+                padding-inline-start: 1.5rem;
+                margin-top: .25rem;
+
+                li::marker {
+                        color: rgba(26, 26, 26, 0.9);
+                        //color: get-pep-color($pepperi-theme, color-text, color-system);
+                    }
+        }
+}

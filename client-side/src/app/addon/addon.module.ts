@@ -19,11 +19,10 @@ import { PepMenuModule } from '@pepperi-addons/ngx-lib/menu';
 // import { PepSearchModule } from '@pepperi-addons/ngx-lib/search';
 
 import { PepGenericListModule } from '@pepperi-addons/ngx-composite-lib/generic-list';
-
+import { AddSlugModule } from '../addon/Components/Add-Slug/add-slug.module';
 import { PepTextboxModule } from '@pepperi-addons/ngx-lib/textbox';
-
 import { TranslateLoader, TranslateModule, TranslateService, TranslateStore } from '@ngx-translate/core';
-
+import { PepDialogService } from '@pepperi-addons/ngx-lib/dialog';
 import { AddonService } from '../services/addon.service';
 import { AddonComponent } from './index';
 import { TodoForm } from './form/todo-form.component';
@@ -65,6 +64,7 @@ export const routes: Routes = [
         MatDialogModule,
         MatTabsModule,
         PepGenericListModule,
+        AddSlugModule,
         TranslateModule.forChild({
             loader: {
                 provide: TranslateLoader,
@@ -78,7 +78,8 @@ export const routes: Routes = [
     providers: [
         TranslateStore,
         // When loading this module from route we need to add this here (because only this module is loading).
-        AddonService
+        AddonService,
+        PepDialogService
     ]
 })
 export class AddonModule {
