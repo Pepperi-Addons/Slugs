@@ -16,7 +16,7 @@ const routes: Routes = [
         path: `settings/:addon_uuid`,
         children: [
             {
-                path: 'todos',
+                path: 'slugs',
                 component: AddonComponent,
             },
             {
