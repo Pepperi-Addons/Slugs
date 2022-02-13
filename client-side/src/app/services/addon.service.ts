@@ -5,6 +5,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http'
 import { PepHttpService, PepSessionService } from '@pepperi-addons/ngx-lib';
 import { ISlug } from '../addon/Components/Add-Slug/add-slug.component';
+import { config } from 'addon.config';
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 
 
 @Injectable({ providedIn: 'root' })
@@ -24,25 +26,43 @@ export class AddonService {
         })
     }
 
+
+
     constructor(
         public session:  PepSessionService,
         private httpClient: HttpClient,
         private pepHttp: PepHttpService
     ) {
+        this.addonUUID = config.AddonUUID;
         const accessToken = this.session.getIdpToken();
         this.parsedToken = jwt(accessToken);
         this.papiBaseURL = this.parsedToken["pepperi.baseurl"];
     }
 
     getSlugs(query?: string) {
-        let url = `/addons/files/714671a5-5274-4668-97fa-e122dd3fc542?folder='/'`;
-        //let url = `/addons/files/${this.addonUUID}`
+        let url = `/addons/api/${this.addonUUID}/api/slugs`;
        //query = '?order_by="UID"';
-       if (query) {
+       if (query) { 
             url = url + query;
-       }
+        }
+        // https://papi.pepperi.com/V1.0/addons/files/714671a5-5274-4668-97fa-e122dd3fc542?folder='/'
         return this.papiClient.get(encodeURI(url));
+        //return this.pepGet(encodeURI(url)).toPromise();
     }
+
+
+    
+    // getSlugs(query?: string) {
+    // //     let url = `/addons/files/714671a5-5274-4668-97fa-e122dd3fc542?folder='/'`;
+    // //     //let url = `/addons/files/${this.addonUUID}`
+    // //    //query = '?order_by="UID"';
+    // //    if (query) {
+    // //         url = url + query;
+    // //    }
+    // //     return this.papiClient.get(encodeURI(url));
+
+    // return this.papiClient.addons.data.uuid(this.addonUUID).table('Slugs')
+    // }
 
     async deleteSlug(slug: ISlug, query?: string){
         return new Promise(async (resolve, reject) => {

@@ -49,22 +49,9 @@ export class AddonComponent implements OnInit {
             if (state.searchString != "") {
               //res = res.filter(collection => collection.Name.toLowerCase().includes(state.searchString.toLowerCase()))
             }
-            return [
-                {
-                    Key: 'Name',
-                    Name: 'Home Page',
-                    Description: 'Ottawa',
-                    Slug: '/homepage'
-                },
-                {
-                    Key: 'Description',
-                    Name: 'Dashboard',
-                    Description: 'Monterrey',
-                    Slug: '/dashboard'
-                }
-            ]
+            return res;
         },
-        totalCount: 10, // TODO - SET THIS PARAM
+        totalCount: 2, // TODO - SET THIS PARAM
         dataView: {
                 Context: {
                     Name: '',
@@ -94,6 +81,13 @@ export class AddonComponent implements OnInit {
                         Title: this.translate.instant("SLUGS_TAB.SLUG"),
                         Mandatory: false,
                         ReadOnly: true
+                    },
+                    {
+                        FieldID: "PageType",
+                        Type: 'TextBox',
+                        Title: this.translate.instant("SLUGS_TAB.PAGE_TYPE"),
+                        Mandatory: false,
+                        ReadOnly: true
                     }
                 ],
                 Columns: [
@@ -104,7 +98,10 @@ export class AddonComponent implements OnInit {
                       Width: 40
                     },
                     {
-                      Width: 35
+                      Width: 18
+                    },
+                    {
+                      Width: 17
                     }
                 ],
                 FrozenColumnsCount: 0,
