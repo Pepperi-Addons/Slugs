@@ -15,6 +15,7 @@
         "CREATE_SLUG": "Create Slug",
         "CANCEL": "Cancel",
         "EDIT": "Edit",
+        "Save": "Save",
         "DELETE": "Delete"
     },
 
@@ -31,5 +32,11 @@
         "INCLUDE_RELEVANT_KEYWORDS": "Include relevant keywords",
         "KEEP_IT_SHORT": "Keep ot short, 1-5 words",
         "MAKE_READABLE": "Make them readable"
+    },
+
+    "VALIDATION": {
+        "EMPTY_SLUG": "Slug can't be empty",
+        "WHITE_SPACES_MSG": "White spaces are not allowed",
+        "UPPER_CASE_MSG": "Upper case latters are not allowed"
     }
 }

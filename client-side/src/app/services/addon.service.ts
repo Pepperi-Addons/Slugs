@@ -12,6 +12,7 @@ import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 @Injectable({ providedIn: 'root' })
 export class AddonService {
 
+    addonURL = '';
     accessToken = '';
     parsedToken: any
     papiBaseURL = ''
@@ -34,41 +35,51 @@ export class AddonService {
         private pepHttp: PepHttpService
     ) {
         this.addonUUID = config.AddonUUID;
+        this.addonURL = `/addons/data/${this.addonUUID}/Slugs`;
         const accessToken = this.session.getIdpToken();
         this.parsedToken = jwt(accessToken);
         this.papiBaseURL = this.parsedToken["pepperi.baseurl"];
     }
 
     getSlugs(query?: string) {
-        let url = `/addons/api/${this.addonUUID}/api/slugs`;
-       //query = '?order_by="UID"';
-       if (query) { 
-            url = url + query;
-        }
-        // https://papi.pepperi.com/V1.0/addons/files/714671a5-5274-4668-97fa-e122dd3fc542?folder='/'
-        return this.papiClient.get(encodeURI(url));
-        //return this.pepGet(encodeURI(url)).toPromise();
+        //query = '?where=Slug="avnerslssdug"';
+        if (query) { 
+            this.addonURL = this.addonURL + query;
+        }    
+        return this.papiClient.get(encodeURI(this.addonURL)); 
     }
 
-
+   
     
-    // getSlugs(query?: string) {
-    // //     let url = `/addons/files/714671a5-5274-4668-97fa-e122dd3fc542?folder='/'`;
-    // //     //let url = `/addons/files/${this.addonUUID}`
-    // //    //query = '?order_by="UID"';
-    // //    if (query) {
-    // //         url = url + query;
-    // //    }
-    // //     return this.papiClient.get(encodeURI(url));
+    async upsertSlug(slug: ISlug, query?: string, callback = null){
 
-    // return this.papiClient.addons.data.uuid(this.addonUUID).table('Slugs')
-    // }
-
+        return new Promise(async (resolve, reject) => {
+            let body = {
+                    Name: slug.Name,
+                    Description: slug.Description,
+                    Slug: slug.Slug || '',
+                    Hidden: slug.Hidden,
+                    Key: slug.Key || null
+            };
+        
+            // work on prod
+            //let distAddons = await this.pepHttp.postHttpCall(`/addons/data/${this.addonUUID}/Slugs`, body).subscribe((res) => {
+            // work on locallhost
+            await this.pepHttp.postHttpCall('http://localhost:4500/api/slugs', body).subscribe((res) => {
+                //resolve(res);
+                if(callback){
+                    callback(res);
+                }
+            });       
+                  
+        });
+    }
+    
     async deleteSlug(slug: ISlug, query?: string){
         return new Promise(async (resolve, reject) => {
             let body = {
-                    Key: slug.name,
-                    Description: slug.description,
+                    Key: slug.Name,
+                    Description: slug.Description,
                     Hidden: true
             };
     

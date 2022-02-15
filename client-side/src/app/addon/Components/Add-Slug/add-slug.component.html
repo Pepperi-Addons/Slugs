@@ -1,9 +1,9 @@
-<pep-dialog title="{{isModified ? ('ADD_SLUG.EDIT_SLUG'|translate) : ('ADD_SLUG.CREATE_NEW_TITLE' | translate)}}">
+<pep-dialog [title]="dlgHeader">
     <ng-container pep-dialog-content>
         <div class="addSlugCont">
             <div>
-            <pep-textbox [label]="'ADD_SLUG.DISPLAY_NAME' | translate" [(value)]="slug.name" sizeType="md"></pep-textbox>
-            <pep-textarea [(value)]="slug.description" [label]="'ADD_SLUG.DESCRIPTION' | translate" [disabled]="false" 
+            <pep-textbox [label]="'ADD_SLUG.DISPLAY_NAME' | translate" [(value)]="slug.Name" sizeType="md"></pep-textbox>
+            <pep-textarea [(value)]="slug.Description" [label]="'ADD_SLUG.DESCRIPTION' | translate" [disabled]="false" 
                   rowSpan="1.5">
             </pep-textarea>
             <!-- <pep-select [label]="'ADD_SLUG.PAGE_TYPES' | translate" [value]="slug.pageType" [options]="pageTypes" 
@@ -11,7 +11,8 @@
             </pep-select> -->
         </div>
     <div>
-            <pep-textbox [label]="'ADD_SLUG.SLUG' | translate" type="link" [(value)]="slug.slugURL" sizeType="md"></pep-textbox>
+            <pep-textbox [label]="'ADD_SLUG.SLUG' | translate" type="link" [(value)]="slug.Slug" sizeType="md"></pep-textbox>
+            <div [style.visibility]="validateMsg === '' ? 'hidden': 'visible'"  class="body-xs validationMsg">{{validateMsg}}</div>
             <div class="ulCont">
             <span class="body-xs">{{'ADD_SLUG.HOW_TO_SLUG' | translate}}</span>
             <ul class="body-sm">
@@ -27,6 +28,6 @@
     </ng-container>
     <ng-container pep-dialog-actions>
         <pep-button [value]="'ACTIONS.CANCEL' | translate" [styleType]="'weak'" sizeType="sm" class="pep-spacing-element" (buttonClick)="close($event);"></pep-button>
-        <pep-button value="{{isModified ? ('ACTIONS.EDIT'|translate) : ('ACTIONS.CREATE_SLUG' | translate)}}"  [styleType]="'strong'" sizeType="sm"  (buttonClick)="createSlug($event);"></pep-button>
+        <pep-button value="{{isModified ? ('ACTIONS.SAVE'|translate) : ('ACTIONS.CREATE_SLUG' | translate)}}"  [styleType]="'strong'" sizeType="sm"  (buttonClick)="createSlug($event);"></pep-button>
     </ng-container>
 </pep-dialog>

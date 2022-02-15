@@ -11,6 +11,15 @@ $pepperi-theme: get-pepperi-theme();
         gap: 1rem;
 }
 
+.validationMsg{
+        background: rgb(230, 38, 0);
+        border-radius: 0 0 4px 4px;
+        color: #fff;
+        padding: .25rem .5rem;
+        margin: -1.1rem 0 .75rem 0;
+        height: 1.5rem;
+}
+
 .ulCont{
         color: get-pep-color($pepperi-theme, color-text, color-dimmed);
 

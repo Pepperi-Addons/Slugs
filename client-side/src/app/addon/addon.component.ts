@@ -3,13 +3,14 @@ import { ObjectsDataRow, PepLayoutService, PepScreenSizeType } from '@pepperi-ad
 import { TranslateService } from '@ngx-translate/core';
 import { AddonService } from "../services/addon.service";
 // import { GenericListComponent, GenericListDataSource } from "@pepperi-addons/ngx-composite-lib/generic-list";
-import { GenericListComponent, IPepGenericListDataSource, IPepGenericListPager, IPepGenericListActions } from "@pepperi-addons/ngx-composite-lib/generic-list";
+import { GenericListComponent, IPepGenericListDataSource, IPepGenericListPager, IPepGenericListActions, IPepGenericListInitData, PepGenericListService } from "@pepperi-addons/ngx-composite-lib/generic-list";
 import { ActivatedRoute, Router } from "@angular/router";
 import { IPepFormFieldClickEvent } from "@pepperi-addons/ngx-lib/form";
 import { PepDialogActionButton, PepDialogData, PepDialogService } from "@pepperi-addons/ngx-lib/dialog";
 import { AddSlugComponent, ISlug } from '../addon/Components/Add-Slug/add-slug.component';
 import { MatDialogRef } from "@angular/material/dialog";
 import { PepSelectionData } from "@pepperi-addons/ngx-lib/list";
+import { GridDataViewField } from "@pepperi-addons/papi-sdk";
 
 @Component({
     selector: 'addon-module',
@@ -18,9 +19,8 @@ import { PepSelectionData } from "@pepperi-addons/ngx-lib/list";
     providers: [AddSlugComponent]
 })
 export class AddonComponent implements OnInit {
-
-    @ViewChild(GenericListComponent) slugsList: GenericListComponent;
-    
+   
+    dataSource: IPepGenericListDataSource;
     screenSize: PepScreenSizeType;
 
     constructor(
@@ -29,84 +29,16 @@ export class AddonComponent implements OnInit {
         public route: ActivatedRoute,
         public layoutService: PepLayoutService,
         public translate: TranslateService,
-        public dialogService: PepDialogService
+        public dialogService: PepDialogService,
+        private genericListService: PepGenericListService
     ) {
+        this.dataSource = this.setDataSource();
         this.layoutService.onResize$.subscribe(size => {
             this.screenSize = size;
         });
     }
 
     async ngOnInit() {
-        
-    }
-
-    dataSource: IPepGenericListDataSource = {
-    //slugsDataSource: GenericListDataSource = {
-        
-        getList: async (state) => {
-            let res = await this.addonService.getSlugs();
-            
-            if (state.searchString != "") {
-              //res = res.filter(collection => collection.Name.toLowerCase().includes(state.searchString.toLowerCase()))
-            }
-            return res;
-        },
-        totalCount: 2, // TODO - SET THIS PARAM
-        dataView: {
-                Context: {
-                    Name: '',
-                    Profile: { InternalID: 0 },
-                    ScreenSize: 'Landscape'
-                },
-                Type: 'Grid',
-                Title: '',
-                Fields: [
-                    {
-                        FieldID: "Name",
-                        Type: 'TextBox',
-                        Title: this.translate.instant("SLUGS_TAB.NAME"),
-                        Mandatory: false,
-                        ReadOnly: true
-                    },
-                    {
-                        FieldID: "Description",
-                        Type: 'TextBox',
-                        Title: this.translate.instant("SLUGS_TAB.DESCRIPTION"),
-                        Mandatory: false,
-                        ReadOnly: true
-                    },
-                    {
-                        FieldID: "Slug",
-                        Type: 'TextBox',
-                        Title: this.translate.instant("SLUGS_TAB.SLUG"),
-                        Mandatory: false,
-                        ReadOnly: true
-                    },
-                    {
-                        FieldID: "PageType",
-                        Type: 'TextBox',
-                        Title: this.translate.instant("SLUGS_TAB.PAGE_TYPE"),
-                        Mandatory: false,
-                        ReadOnly: true
-                    }
-                ],
-                Columns: [
-                    {
-                      Width: 25
-                    },
-                    {
-                      Width: 40
-                    },
-                    {
-                      Width: 18
-                    },
-                    {
-                      Width: 17
-                    }
-                ],
-                FrozenColumnsCount: 0,
-                MinimumColumnWidth: 0
-        }
         
     }
 
@@ -123,8 +55,7 @@ export class AddonComponent implements OnInit {
                     {
                         title: this.translate.instant("ACTIONS.EDIT"),
                         handler: async (ddd) => {
-                            let dataRow = this.slugsList.customList.getItemDataByID(data.rows[0]);
-                            this.editSlug(dataRow);
+                            this.editSlug(data.rows[0]);
                         }
                     },
                     {
@@ -143,13 +74,90 @@ export class AddonComponent implements OnInit {
                         }
                     }
                 ]
-            } else return [];
+            } 
+            else {
+            return [];
+            }
         }
     }
 
-    addNewSlug(slug: ISlug = null){
+    setDataSource() {
+        return {
+        
+            init: async (state) => {
+                let res = await this.addonService.getSlugs();
+                
+                if (state.searchString != "") {
+                  //res = res.filter(collection => collection.Name.toLowerCase().includes(state.searchString.toLowerCase()))
+                }
+                return {
+                    items: res,
+                    totalCount: res.length,
+                    dataView: {
+                        Context: {
+                            Name: '',
+                            Profile: { InternalID: 0 },
+                            ScreenSize: 'Landscape'
+                        },
+                        Type: 'Grid',
+                        Title: '',
+                        Fields: [
+                            {
+                                FieldID: "Name",
+                                Type: 'TextBox',
+                                Title: this.translate.instant("SLUGS_TAB.NAME"),
+                                Mandatory: false,
+                                ReadOnly: true
+                            },
+                            {
+                                FieldID: "Description",
+                                Type: 'TextBox',
+                                Title: this.translate.instant("SLUGS_TAB.DESCRIPTION"),
+                                Mandatory: false,
+                                ReadOnly: true
+                            },
+                            {
+                                FieldID: "Slug",
+                                Type: 'TextBox',
+                                Title: this.translate.instant("SLUGS_TAB.SLUG"),
+                                Mandatory: false,
+                                ReadOnly: true
+                             }//,
+                            // {
+                            //     FieldID: "PageType",
+                            //     Type: 'TextBox',
+                            //     Title: this.translate.instant("SLUGS_TAB.PAGE_TYPE"),
+                            //     Mandatory: false,
+                            //     ReadOnly: true
+                            // }
+                        ],
+                        Columns: [
+                            {
+                              Width: 25
+                            },
+                            {
+                              Width: 40
+                            },
+                            {
+                              Width: 35
+                            }//,
+                            // {
+                            //   Width: 17
+                            // }
+                        ],
+                        FrozenColumnsCount: 0,
+                        MinimumColumnWidth: 0
+                }
+                } as IPepGenericListInitData;//res;
+            }  
+        }
+    }
+    openSlugDLG(slug: ISlug = null){
        
         this.openDialog(AddSlugComponent,(res) => {
+            this.addonService.upsertSlug(slug, null, (res) => {
+                this.dataSource = this.setDataSource();
+            })
             // TODO - CREATE NEW SLUG
         }, {'slug': slug,});
 
@@ -180,17 +188,21 @@ export class AddonComponent implements OnInit {
             });
     }
     onCustomizeFieldClick(fieldClickEvent: IPepFormFieldClickEvent){
-         let dr = this.slugsList.customList.getItemDataByID(fieldClickEvent.id);
-         this.editSlug(dr);  
+         //let dr = this.slugsList.customList.getItemDataByID(fieldClickEvent.id);
+         this.editSlug(fieldClickEvent.id);  
     }
 
-    editSlug(dr: ObjectsDataRow){
-        let slug = new ISlug();
-         slug.name = dr.Fields[0].FormattedValue;
-         slug.description = dr.Fields[1].FormattedValue;
-         slug.slugURL = dr.Fields[2].FormattedValue;
+    editSlug(key: string){
+        let dr: ObjectsDataRow = this.genericListService.getItemById(key);
 
-         this.addNewSlug(slug);
+        let slug = new ISlug();
+         slug.Name = dr.Fields[0].FormattedValue;
+         slug.Description = dr.Fields[1].FormattedValue;
+         slug.Slug = dr.Fields[2].FormattedValue;
+         //slug.PageType = dr.Fields[3].FormattedValue;
+         slug.Key = dr.UID;
+
+         this.openSlugDLG(slug);
     }
 
     showDeleteAssetMSG(callback?: any){
@@ -205,8 +217,8 @@ export class AddonComponent implements OnInit {
         this.dialogService.openDefaultDialog(dialogData).afterClosed()
         .subscribe((isDeletePressed) => {
             if (isDeletePressed) {
-                let selectedSlugs = this.slugsList.customList.getSelectedItemsData();
-                debugger;
+                //let selectedSlugs = this.slugsList.customList.getSelectedItemsData();
+                //debugger;
             }
     });
         
