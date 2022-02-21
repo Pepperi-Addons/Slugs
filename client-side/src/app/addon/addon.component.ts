@@ -114,7 +114,7 @@ export class AddonComponent implements OnInit {
                         Fields: [
                             {
                                 FieldID: "Name",
-                                Type: 'TextBox',
+                                Type: 'Link',
                                 Title: this.translate.instant("SLUGS_TAB.NAME"),
                                 Mandatory: false,
                                 ReadOnly: true
