@@ -16,7 +16,7 @@
     "Editors": [
       {
         "ParentPackageName": "Slugs",
-        "PackageName": "Slug mapping",
+        "PackageName": "slugs",
         "Description": "A list of slugs that can be mapped to pages"
       }
     ],
