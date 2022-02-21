@@ -13,13 +13,11 @@ export async function slugs(client: Client, request: Request) {
         return service.getSlugs(request.query);
     }
     else if(request.method === 'POST'){
-        request.query = `where=Slug=${request.body.Slug}`;
-        const slug = await service.getSlugs(request.query);
-        if(slug.length == 0){
-            return service.createSlug(request);
-        }
-        else{
-            throw new Error(`Slug ${request.body.Slug} allready exists`);
+        try {
+            return service.upsertSlug(request.body);
+            
+        } catch (error) {
+            throw new Error(error);
         }
     }
     else{

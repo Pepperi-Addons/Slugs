@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {  TranslateService } from '@ngx-translate/core';
+import { PepCustomizationService } from '@pepperi-addons/ngx-lib';
 
 @Component({
     selector: 'addon-root',
@@ -8,10 +9,12 @@ import {  TranslateService } from '@ngx-translate/core';
 })
 export class AppComponent implements OnInit {
     constructor(
-        public translate: TranslateService
+        public translate: TranslateService,
+        public customizationService: PepCustomizationService
     ) {
     }
 
     ngOnInit() {
+        this.customizationService.setThemeVariables();
     }
 }

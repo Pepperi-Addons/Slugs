@@ -21,7 +21,10 @@ import { GridDataViewField } from "@pepperi-addons/papi-sdk";
 export class AddonComponent implements OnInit {
    
     dataSource: IPepGenericListDataSource;
+    slugsList: Array<any>;
     screenSize: PepScreenSizeType;
+    slugSelectionData: PepSelectionData;
+    public pager: IPepGenericListPager;
 
     constructor(
         public addonService: AddonService,
@@ -30,20 +33,27 @@ export class AddonComponent implements OnInit {
         public layoutService: PepLayoutService,
         public translate: TranslateService,
         public dialogService: PepDialogService,
-        private genericListService: PepGenericListService
+        private genericListService: PepGenericListService,
+       
     ) {
         this.dataSource = this.setDataSource();
+        
         this.layoutService.onResize$.subscribe(size => {
             this.screenSize = size;
         });
     }
 
     async ngOnInit() {
-        
+        this.pager = {
+            type: 'pages',
+            size: 10,
+            index: 0
+        };
     }
 
     actions: IPepGenericListActions = {        
         get: async (data: PepSelectionData) => {
+            this.slugSelectionData = data;
             if (data?.selectionType === 0) {
                 /*const list = await this.dataSource.getList({ searchString: '', fromIndex: 0, toIndex: 20 });
                 if (list?.length === data?.rows.length) {
@@ -55,7 +65,7 @@ export class AddonComponent implements OnInit {
                     {
                         title: this.translate.instant("ACTIONS.EDIT"),
                         handler: async (ddd) => {
-                            this.editSlug(data.rows[0]);
+                            this.editSlug(this.slugSelectionData.rows);
                         }
                     },
                     {
@@ -85,14 +95,14 @@ export class AddonComponent implements OnInit {
         return {
         
             init: async (state) => {
-                let res = await this.addonService.getSlugs();
+                this.slugsList = await this.addonService.getSlugs();
                 
                 if (state.searchString != "") {
                   //res = res.filter(collection => collection.Name.toLowerCase().includes(state.searchString.toLowerCase()))
                 }
                 return {
-                    items: res,
-                    totalCount: res.length,
+                    items: this.slugsList,
+                    totalCount: this.slugsList.length,
                     dataView: {
                         Context: {
                             Name: '',
@@ -155,10 +165,9 @@ export class AddonComponent implements OnInit {
     openSlugDLG(slug: ISlug = null){
        
         this.openDialog(AddSlugComponent,(res) => {
-            this.addonService.upsertSlug(slug, null, (res) => {
+            if(res){
                 this.dataSource = this.setDataSource();
-            })
-            // TODO - CREATE NEW SLUG
+            }
         }, {'slug': slug,});
 
     }
@@ -170,7 +179,7 @@ export class AddonComponent implements OnInit {
             config.minWidth = '29rem'; // THE EDIT MODAL WIDTH
     
         let dialogRef: MatDialogRef<any> = this.dialogService.openDialog(comp, data, config);
-    
+       
         dialogRef.afterClosed().subscribe((value) => {
             if (value !== undefined && value !== null) {
                callBack(value);
@@ -189,27 +198,39 @@ export class AddonComponent implements OnInit {
     }
     onCustomizeFieldClick(fieldClickEvent: IPepFormFieldClickEvent){
          //let dr = this.slugsList.customList.getItemDataByID(fieldClickEvent.id);
-         this.editSlug(fieldClickEvent.id);  
+         this.editSlug([fieldClickEvent.id]);  
+    }
+    
+    getAllSlugsUUID(){
+        let uuids: Array<string> = [];
+        this.slugsList.forEach( slug  => {
+            uuids.push(slug.Key);
+        });
+        return uuids;
     }
 
-    editSlug(key: string){
-        let dr: ObjectsDataRow = this.genericListService.getItemById(key);
-
+    getSelectedSlug(){
+        
+        let dr: ObjectsDataRow = this.genericListService.getItemById(this.slugSelectionData.rows[0]);
         let slug = new ISlug();
-         slug.Name = dr.Fields[0].FormattedValue;
-         slug.Description = dr.Fields[1].FormattedValue;
-         slug.Slug = dr.Fields[2].FormattedValue;
-         //slug.PageType = dr.Fields[3].FormattedValue;
-         slug.Key = dr.UID;
+        
+            slug.Name = dr.Fields[0].FormattedValue;
+            slug.Description = dr.Fields[1].FormattedValue;
+            slug.Slug = dr.Fields[2].FormattedValue;
+            slug.Key = dr.UID;
+        
+        return slug;
+    }
 
-         this.openSlugDLG(slug);
+    editSlug(keys: Array<string>){
+         this.openSlugDLG(this.getSelectedSlug());
     }
 
     showDeleteAssetMSG(callback?: any){
-        
+        var self = this;
         const dialogData = new PepDialogData({
           
-          content: this.translate.instant('GRID.CONFIRM_DELETE'),
+          content: this.translate.instant('ACTIONS.CONFIRM_DELETE'),
           showHeader: false,
           actionsType: 'cancel-delete',
           showClose: false,
@@ -217,15 +238,15 @@ export class AddonComponent implements OnInit {
         this.dialogService.openDefaultDialog(dialogData).afterClosed()
         .subscribe((isDeletePressed) => {
             if (isDeletePressed) {
-                //let selectedSlugs = this.slugsList.customList.getSelectedItemsData();
-                //debugger;
+                
+                //let slugs =  self.getSlugByID(self.slugSelectionData);
+ 
+                this.addonService.upsertSlug(null, true, self.slugSelectionData, (res) => {
+                    this.dataSource = this.setDataSource();
+                });
+  
+
             }
     });
-        
-
-       //this.openDialogMsg(dialogData,(data) => {
-        //debugger;
-           //let res = await this.addonService.deleteSlug();
-       //})
   }
 }

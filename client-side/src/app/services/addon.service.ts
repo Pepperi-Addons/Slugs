@@ -7,6 +7,7 @@ import { PepHttpService, PepSessionService } from '@pepperi-addons/ngx-lib';
 import { ISlug } from '../addon/Components/Add-Slug/add-slug.component';
 import { config } from 'addon.config';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
+import { PepSelectionData } from '@pepperi-addons/ngx-lib/list';
 
 
 @Injectable({ providedIn: 'root' })
@@ -42,7 +43,7 @@ export class AddonService {
     }
 
     getSlugs(query?: string) {
-        //query = '?where=Slug="avnerslssdug"';
+        // query = '?where=Slug="avner666"';
         if (query) { 
             this.addonURL = this.addonURL + query;
         }    
@@ -51,22 +52,21 @@ export class AddonService {
 
    
     
-    async upsertSlug(slug: ISlug, query?: string, callback = null){
+    async upsertSlug(slug: ISlug, isDelete: boolean = false, selectedObj: PepSelectionData = null, callback = null){
 
         return new Promise(async (resolve, reject) => {
+
             let body = {
-                    Name: slug.Name,
-                    Description: slug.Description,
-                    Slug: slug.Slug || '',
-                    Hidden: slug.Hidden,
-                    Key: slug.Key || null
+                slug: slug,
+                isDelete: isDelete,
+                selectedObj: selectedObj
             };
         
             // work on prod
             //let distAddons = await this.pepHttp.postHttpCall(`/addons/data/${this.addonUUID}/Slugs`, body).subscribe((res) => {
             // work on locallhost
             await this.pepHttp.postHttpCall('http://localhost:4500/api/slugs', body).subscribe((res) => {
-                //resolve(res);
+
                 if(callback){
                     callback(res);
                 }
@@ -74,26 +74,6 @@ export class AddonService {
                   
         });
     }
-    
-    async deleteSlug(slug: ISlug, query?: string){
-        return new Promise(async (resolve, reject) => {
-            let body = {
-                    Key: slug.Name,
-                    Description: slug.Description,
-                    Hidden: true
-            };
-    
-            //let res = await this.addonService.papiClient.addons.api.uuid(this.addonUUID).file('api').func('create_asset').post(undefined, body);
-           await this.httpClient.post('http://localhost:4500/api/delet_slug', body, {
-            headers: {
-                'Authorization': 'Bearer ' + this.accessToken
-            }
-           }).subscribe((res) => {
-                resolve(res);
-            });
-        });
-            //this.addonService.papiClient.post(encodeURI(url),body);
-        }
 
     async get(endpoint: string): Promise<any> {
         return await this.papiClient.get(endpoint);

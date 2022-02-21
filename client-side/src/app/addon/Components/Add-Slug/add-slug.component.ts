@@ -1,6 +1,7 @@
 import { Component, OnInit, Injectable, Input, Output, EventEmitter, Optional, Inject, ViewChild, ElementRef } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
+import { AddonService } from 'src/app/services/addon.service';
 
 export class ISlug {
     Name: string = '';
@@ -27,7 +28,9 @@ export class AddSlugComponent implements OnInit {
     public dlgHeader: string = '';
     public validateMsg: string = '';
 
-    constructor(private translate: TranslateService ,private dialogRef: MatDialogRef<AddSlugComponent>, @Inject(MAT_DIALOG_DATA) public data: any) {
+    constructor(private addonService: AddonService, 
+                private translate: TranslateService ,
+                private dialogRef: MatDialogRef<AddSlugComponent>, @Inject(MAT_DIALOG_DATA) public data: any) {
         
     }
 
@@ -43,23 +46,37 @@ export class AddSlugComponent implements OnInit {
         this.dialogRef?.close();
     }
 
-    createSlug(event){
+    checkSlugValidation(event){
+       
         this.validateMsg = '';
-        if( this.data.slug.Slug === ''){
+        if( !event || event === ''){
             this.validateMsg = this.translate.instant("VALIDATION.EMPTY_SLUG") ;
         }
-        else if( this.hasWhiteSpace(this.data.slug.Slug)){
+        if( this.hasWhiteSpace(event)){
             this.validateMsg = this.translate.instant("VALIDATION.WHITE_SPACES_MSG") ;
         }
-        else if( this.hasUpperCase(this.data.slug.Slug)){
+        else if( this.hasUpperCase(event)){
             this.validateMsg = this.translate.instant("VALIDATION.UPPER_CASE_MSG") ;
         }
         if(this.validateMsg !== ''){
             return false;
         }
-        
-        return false;
-        this.dialogRef?.close(this.data.slug);
+
+        return true;
+    }
+
+    createSlug(event){
+        if(this.checkSlugValidation(this.data.slug.Slug)){
+            this.addonService.upsertSlug(this.data.slug, false, null, (res) => {
+                if(res.success){
+                    this.dialogRef?.close(true);
+                }
+                else{
+                    this.validateMsg = res.message;
+                }
+            
+            });
+        }
     }
 
     hasWhiteSpace(str) {

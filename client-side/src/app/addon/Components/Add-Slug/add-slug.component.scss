@@ -1,9 +1,13 @@
-@import '~@pepperi-addons/ngx-lib/theming';
+//@import '~@pepperi-addons/ngx-lib/theming';
+@use '~@pepperi-addons/ngx-lib/src/core/style/abstracts/variables' as ngx-variables;
+@use '~@pepperi-addons/ngx-lib/src/core/style/abstracts/functions' as ngx-functions;
+@use '~@pepperi-addons/ngx-lib/src/core/style/abstracts/mixins' as ngx-mixins;
+
 //@import 'ngx-lib/src/core/style/abstracts/variables';
 //@import 'ngx-lib/src/core/style/abstracts/mixins';
-@include pepperi-theme();
+//@include pepperi-theme();
 // Get the theme object.
-$pepperi-theme: get-pepperi-theme();
+//$pepperi-theme: get-pepperi-theme();
 
 .addSlugCont{
         display: flex;
@@ -12,16 +16,18 @@ $pepperi-theme: get-pepperi-theme();
 }
 
 .validationMsg{
-        background: rgb(230, 38, 0);
+        //background: rgb(230, 38, 0);
         border-radius: 0 0 4px 4px;
-        color: #fff;
         padding: .25rem .5rem;
         margin: -1.1rem 0 .75rem 0;
         height: 1.5rem;
+        background: ngx-functions.get-pep-color(color-system-caution, color-base);
+        color: ngx-functions.get-pep-color(color-text, color-invert);
+        font-weight: var(--pep-font-weight-bold, 600);
 }
 
 .ulCont{
-        color: get-pep-color($pepperi-theme, color-text, color-dimmed);
+        color: ngx-functions.get-pep-color(color-text, color-dimmed);
 
         ul{
                 padding-inline-start: 1.5rem;
