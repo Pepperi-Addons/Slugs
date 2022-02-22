@@ -4,12 +4,24 @@ import { TranslateService } from '@ngx-translate/core';
 import { AddonService } from 'src/app/services/addon.service';
 
 export class ISlug {
-    Name: string = '';
-    Description: string = '';
+    Name: string;
+    Description: string;
     //PageType: string = '';
-    Slug: string = '';
-    Hidden: boolean = false;
-    Key: string = null;
+    Slug: string;
+    Hidden: boolean;
+    Key: string;
+    ModificationDateTime: string;
+    CreationDateTime: string;
+
+    constructor(name='', description='', slug='', key=null, hidden = false , modificationDateTime = new Date().toISOString(), creationDateTime = new Date().toISOString()){
+        this.Name = name;
+        this.Description = description;
+        this.Slug = slug;
+        this.Key = key;
+        this.Hidden = hidden;
+        this.ModificationDateTime = modificationDateTime;
+        this.CreationDateTime = creationDateTime;
+    }
 }
 
 @Component({
