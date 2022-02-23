@@ -12,6 +12,7 @@ import { MatDialogRef } from "@angular/material/dialog";
 import { PepSelectionData } from "@pepperi-addons/ngx-lib/list";
 import { GridDataViewField } from "@pepperi-addons/papi-sdk";
 import { IPepProfileDataViewsCard, IPepProfile, IPepProfileDataView, IPepProfileDataViewClickEvent } from '@pepperi-addons/ngx-lib/profile-data-views-list';
+import { sys } from "typescript";
 
 @Component({
     selector: 'addon-module',
@@ -20,13 +21,15 @@ import { IPepProfileDataViewsCard, IPepProfile, IPepProfileDataView, IPepProfile
     providers: [AddSlugComponent]
 })
 export class AddonComponent implements OnInit {
-   
+    // Slugs tab variables
     dataSource: IPepGenericListDataSource;
     slugsList: Array<any>;
     screenSize: PepScreenSizeType;
     slugSelectionData: PepSelectionData;
+    private systemSlugs = [{ Name: 'Homepage', Description: 'Default home page', Key: '98765' , Slug: '/homepage' }];
     public pager: IPepGenericListPager;
 
+    // Mapping tab variables
     defaultProfile: IPepProfileDataViewsCard;
     availableProfiles: Array<IPepProfile> = [];
     profileDataViewsList: Array<IPepProfileDataViewsCard> = [];
@@ -48,56 +51,6 @@ export class AddonComponent implements OnInit {
         });
     }
 
-    // TODO: Implement this
-    private setProfiles() {
-        const repDataViews: IPepProfileDataView[] = [{
-            dataViewId: '1',
-            fields: ['field1', 'field2'],
-            viewType: 'Landscape'
-        }];
-
-        this.defaultProfile = {
-            profileId: '123',
-            title: 'Rep 1',
-            dataViews: repDataViews
-        };
-
-        const buyerDataViews: IPepProfileDataView[] = [{
-            dataViewId: '2',
-            fields: [],
-            viewType: 'Landscape'
-        }];
-
-        const profile2 = {
-            profileId: '345',
-            title: 'Buyer 1',
-            dataViews: buyerDataViews
-        };
-
-        this.profileDataViewsList = [this.defaultProfile, profile2];
-
-        this.availableProfiles = [{
-            id: '123',
-            name: 'Rep'
-        }, {
-            id: '1234',
-            name: 'Rep Agent'
-        }, {
-            id: '345',
-            name: 'Buyer'
-        }, {
-            id: '678',
-            name: 'Admin'
-        }]
-    }
-    
-    private navigateToManageSlugsDataview(dataviewId: string) {
-        this.router.navigate([dataviewId], {
-            relativeTo: this.route,
-            queryParamsHandling: 'merge'
-        });
-    }
-    
     ngOnInit() {
         this.setProfiles();
 
@@ -107,6 +60,10 @@ export class AddonComponent implements OnInit {
             index: 0
         };
     }
+
+    // -----------------------------------------------------------------------------
+    //                              Slugs tab
+    // -----------------------------------------------------------------------------
 
     actions: IPepGenericListActions = {        
         get: async (data: PepSelectionData) => {
@@ -150,10 +107,15 @@ export class AddonComponent implements OnInit {
 
     setDataSource() {
         return {
-        
             init: async (state) => {
                 this.slugsList = await this.addonService.getSlugs();
                 
+                //add default homepage slug to the list 
+                this.systemSlugs.forEach( sysSlug  => {
+                    let slug = new ISlug(sysSlug.Name, sysSlug.Description, sysSlug.Slug, sysSlug.Key, false);
+                    this.slugsList.unshift(slug);
+                });
+
                 if (state.searchString != "") {
                   //res = res.filter(collection => collection.Name.toLowerCase().includes(state.searchString.toLowerCase()))
                 }
@@ -189,14 +151,7 @@ export class AddonComponent implements OnInit {
                                 Title: this.translate.instant("SLUGS_TAB.SLUG"),
                                 Mandatory: false,
                                 ReadOnly: true
-                             }//,
-                            // {
-                            //     FieldID: "PageType",
-                            //     Type: 'TextBox',
-                            //     Title: this.translate.instant("SLUGS_TAB.PAGE_TYPE"),
-                            //     Mandatory: false,
-                            //     ReadOnly: true
-                            // }
+                             }
                         ],
                         Columns: [
                             {
@@ -268,47 +223,143 @@ export class AddonComponent implements OnInit {
         return uuids;
     }
 
-    getSelectedSlug(){
-        
-        let dr: ObjectsDataRow = this.genericListService.getItemById(this.slugSelectionData.rows[0]);
-        let slug = new ISlug();
-        
-            slug.Name = dr.Fields[0].FormattedValue;
-            slug.Description = dr.Fields[1].FormattedValue;
-            slug.Slug = dr.Fields[2].FormattedValue;
-            slug.Key = dr.UID;
-        
-        return slug;
-    }
-
     editSlug(keys: Array<string>){
-         this.openSlugDLG(this.getSelectedSlug());
+
+        if(this.checkIfSlugsCanBeAmended('edit')){
+            let dr: ObjectsDataRow = this.genericListService.getItemById(keys[0]);
+            let slug = new ISlug();
+            
+                slug.Name = dr.Fields[0].FormattedValue;
+                slug.Description = dr.Fields[1].FormattedValue;
+                slug.Slug = dr.Fields[2].FormattedValue;
+                slug.Key = dr.UID;
+
+            this.openSlugDLG(slug);
+        }
     }
 
     showDeleteAssetMSG(callback?: any){
         var self = this;
-        const dialogData = new PepDialogData({
-          
-          content: this.translate.instant('ACTIONS.CONFIRM_DELETE'),
-          showHeader: false,
-          actionsType: 'cancel-delete',
-          showClose: false,
-        });
-        this.dialogService.openDefaultDialog(dialogData).afterClosed()
-        .subscribe((isDeletePressed) => {
-            if (isDeletePressed) {
-                
-                //let slugs =  self.getSlugByID(self.slugSelectionData);
- 
-                this.addonService.upsertSlug(null, true, self.slugSelectionData, (res) => {
-                    this.dataSource = this.setDataSource();
-                });
-  
 
-            }
-    });
+        if(this.checkIfSlugsCanBeAmended('delete')){
+            const dialogData = new PepDialogData({
+                content: this.slugSelectionData.rows.length === 1 ? this.translate.instant('ACTIONS.CONFIRM_DELETE') : this.translate.instant('ACTIONS.CONFIRM_MULTI_DELETE'),
+                showHeader: false,
+                actionsType: 'cancel-delete',
+                showClose: false,
+            });
+
+            this.dialogService.openDefaultDialog(dialogData).afterClosed()
+            .subscribe((isDeletePressed) => {
+                if (isDeletePressed) {
+                    this.deleteSlugs();
+
+                }
+            });
+        }
     }
 
+    deleteSlugs(){
+        this.addonService.upsertSlug(null, true, this.slugSelectionData, (res) => {
+            this.dataSource = this.setDataSource();
+        });
+    }
+
+    checkIfSlugsCanBeAmended(oper: string){
+        let ret = true;
+
+        const deleteType = this.slugSelectionData.selectionType === 1 && this.slugSelectionData.rows.length > 0 ? 'include' :
+                           this.slugSelectionData.selectionType === 0 && this.slugSelectionData.rows.length === 0 ? 'all' : 'exclude';
+
+        if( deleteType === 'all'){
+            ret = false;
+        }
+        else{
+            this.systemSlugs.forEach( sysSlug  => {
+                
+                if(deleteType === 'include' && this.slugSelectionData.rows.includes(sysSlug.Key)){
+                    ret = false;
+                }
+                else if(deleteType === 'exclude' && !this.slugSelectionData.rows.includes(sysSlug.Key)){
+                    ret = false;
+                }
+                
+            });
+        }
+
+        if(!ret){
+                const dialogData = new PepDialogData({
+                    content: oper === 'delete' ? this.translate.instant('ACTIONS.CANT_DELETE') : this.translate.instant('ACTIONS.CANT_EDIT'),
+                    showHeader: false,
+                    //actionsType: this.slugSelectionData.rows.length === 1 ? 'close' : 'cancel-continue',
+                    actionsType: 'close',
+                    showClose: false,
+                });
+    
+                this.dialogService.openDefaultDialog(dialogData).afterClosed()
+                .subscribe(() => {
+                    return ret;
+                });
+        }
+        else{
+            return ret;
+        }
+        
+    }
+
+    // -----------------------------------------------------------------------------
+    //                              Mappings tab
+    // -----------------------------------------------------------------------------
+    // TODO: Implement this
+    private setProfiles() {
+        const repDataViews: IPepProfileDataView[] = [{
+            dataViewId: '1',
+            fields: ['field1', 'field2'],
+            viewType: 'Landscape'
+        }];
+
+        this.defaultProfile = {
+            profileId: '123',
+            title: 'Rep 1',
+            dataViews: repDataViews
+        };
+
+        const buyerDataViews: IPepProfileDataView[] = [{
+            dataViewId: '2',
+            fields: [],
+            viewType: 'Landscape'
+        }];
+
+        const profile2 = {
+            profileId: '345',
+            title: 'Buyer 1',
+            dataViews: buyerDataViews
+        };
+
+        this.profileDataViewsList = [this.defaultProfile, profile2];
+
+        this.availableProfiles = [{
+            id: '123',
+            name: 'Rep'
+        }, {
+            id: '1234',
+            name: 'Rep Agent'
+        }, {
+            id: '345',
+            name: 'Buyer'
+        }, {
+            id: '678',
+            name: 'Admin'
+        }]
+    }
+    
+    private navigateToManageSlugsDataview(dataviewId: string) {
+        this.router.navigate([dataviewId], {
+            relativeTo: this.route,
+            queryParamsHandling: 'merge'
+        });
+    }
+    
     onDataViewEditClicked(event: IPepProfileDataViewClickEvent): void {
         console.log(`edit on ${event.dataViewId} was clicked`);
         this.navigateToManageSlugsDataview(event.dataViewId);
@@ -320,6 +371,5 @@ export class AddonComponent implements OnInit {
 
     onSaveNewProfileClicked(event: string): void {
         console.log(`save new profile was clicked for id - ${event} `);
-
     }
 }

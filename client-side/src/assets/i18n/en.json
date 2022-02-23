@@ -2,7 +2,7 @@
     "PAGE_TITLE": "Page Mapping",
     "SLUGS": "Slugs",
     "MAPPING": "Mapping",
-    "NO_DATA": "Use the button above to get things going",
+    "NO_DATA": "Use the \"Create Slug\" button above to get things going",
     "SLUGS_TAB": {
         "NAME": "Name",
         "DESCRIPTION": "Description",
@@ -16,7 +16,10 @@
         "EDIT": "Edit",
         "Save": "Save",
         "CONFIRM_DELETE": "Are you sure you want to delete this slug?",
-        "DELETE": "Delete"
+        "CONFIRM_MULTI_DELETE": "Are you sure you want to delete those slugs?",
+        "DELETE": "Delete",
+        "CANT_DELETE": "System slugs can’t be deleted",
+        "CANT_EDIT": "System slugs can’t be edited"
     },
     "ADD_SLUG":{
         "CREATE_NEW_TITLE": "Create a new slug",

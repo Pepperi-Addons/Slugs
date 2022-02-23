@@ -41,10 +41,15 @@ export class SlugsService {
                   (deleteType === 'include' && body.selectedObj.rows.includes(slugList[i].Key)) || 
                   (deleteType === 'exclude' && !body.selectedObj.rows.includes(slugList[i].Key))){
                     
-                    let tmpBody = this.getBody(slugList[i]);
-                    tmpBody.Hidden = true;
+                    if(slugList[i].Key !== '98765'){
+                        let tmpBody = this.getBody(slugList[i]);
+                        tmpBody.Hidden = true;
 
-                    await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).upsert(tmpBody);
+                        await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).upsert(tmpBody);
+                    }
+                    else{
+                        throw new Error(`System slug ${slugList[i].Slug} can't be deleted`);
+                    }
                 }
             }
 
@@ -56,6 +61,9 @@ export class SlugsService {
 
             body = this.getBody(body.slug);
 
+            if(body.Key === '98765'){
+                throw new Error(`System slug ${body.Slug} can't be deleted`);
+            }
             if(body.Name === '' || body.Slug === ''){
                 throw new Error(`Name & Slug fields can't be empty.`);  
             }
