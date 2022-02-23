@@ -28,8 +28,6 @@ export class AddonService {
         })
     }
 
-
-
     constructor(
         public session:  PepSessionService,
         private httpClient: HttpClient,

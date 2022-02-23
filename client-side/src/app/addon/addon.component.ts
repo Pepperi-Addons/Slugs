@@ -11,6 +11,7 @@ import { AddSlugComponent, ISlug } from '../addon/Components/Add-Slug/add-slug.c
 import { MatDialogRef } from "@angular/material/dialog";
 import { PepSelectionData } from "@pepperi-addons/ngx-lib/list";
 import { GridDataViewField } from "@pepperi-addons/papi-sdk";
+import { IPepProfileDataViewsCard, IPepProfile, IPepProfileDataView, IPepProfileDataViewClickEvent } from '@pepperi-addons/ngx-lib/profile-data-views-list';
 
 @Component({
     selector: 'addon-module',
@@ -25,6 +26,10 @@ export class AddonComponent implements OnInit {
     screenSize: PepScreenSizeType;
     slugSelectionData: PepSelectionData;
     public pager: IPepGenericListPager;
+
+    defaultProfile: IPepProfileDataViewsCard;
+    availableProfiles: Array<IPepProfile> = [];
+    profileDataViewsList: Array<IPepProfileDataViewsCard> = [];
 
     constructor(
         public addonService: AddonService,
@@ -43,7 +48,59 @@ export class AddonComponent implements OnInit {
         });
     }
 
-    async ngOnInit() {
+    // TODO: Implement this
+    private setProfiles() {
+        const repDataViews: IPepProfileDataView[] = [{
+            dataViewId: '1',
+            fields: ['field1', 'field2'],
+            viewType: 'Landscape'
+        }];
+
+        this.defaultProfile = {
+            profileId: '123',
+            title: 'Rep 1',
+            dataViews: repDataViews
+        };
+
+        const buyerDataViews: IPepProfileDataView[] = [{
+            dataViewId: '2',
+            fields: [],
+            viewType: 'Landscape'
+        }];
+
+        const profile2 = {
+            profileId: '345',
+            title: 'Buyer 1',
+            dataViews: buyerDataViews
+        };
+
+        this.profileDataViewsList = [this.defaultProfile, profile2];
+
+        this.availableProfiles = [{
+            id: '123',
+            name: 'Rep'
+        }, {
+            id: '1234',
+            name: 'Rep Agent'
+        }, {
+            id: '345',
+            name: 'Buyer'
+        }, {
+            id: '678',
+            name: 'Admin'
+        }]
+    }
+    
+    private navigateToManageSlugsDataview(dataviewId: string) {
+        this.router.navigate([dataviewId], {
+            relativeTo: this.route,
+            queryParamsHandling: 'merge'
+        });
+    }
+    
+    ngOnInit() {
+        this.setProfiles();
+
         this.pager = {
             type: 'pages',
             size: 10,
@@ -162,6 +219,7 @@ export class AddonComponent implements OnInit {
             }  
         }
     }
+
     openSlugDLG(slug: ISlug = null){
        
         this.openDialog(AddSlugComponent,(res) => {
@@ -196,6 +254,7 @@ export class AddonComponent implements OnInit {
                     }
             });
     }
+
     onCustomizeFieldClick(fieldClickEvent: IPepFormFieldClickEvent){
          //let dr = this.slugsList.customList.getItemDataByID(fieldClickEvent.id);
          this.editSlug([fieldClickEvent.id]);  
@@ -248,5 +307,19 @@ export class AddonComponent implements OnInit {
 
             }
     });
-  }
+    }
+
+    onDataViewEditClicked(event: IPepProfileDataViewClickEvent): void {
+        console.log(`edit on ${event.dataViewId} was clicked`);
+        this.navigateToManageSlugsDataview(event.dataViewId);
+    }
+
+    onDataViewDeleteClicked(event: IPepProfileDataViewClickEvent): void {
+        console.log(`delete on ${event.dataViewId} was clicked`);
+    }
+
+    onSaveNewProfileClicked(event: string): void {
+        console.log(`save new profile was clicked for id - ${event} `);
+
+    }
 }

@@ -1,13 +1,19 @@
-.mat-tab-group{
+.mat-tab-group {
 
     height: inherit;
 
-    ::ng-deep{
-        .mat-tab-body-wrapper{
+    ::ng-deep {
+        .mat-tab-body-wrapper {
             height: inherit;
         }
-        .mat-tab-body-content{
+        .mat-tab-body-content {
             padding: 0 !important;
+            margin-top: -0.25rem;
+            
+            .profile-data-views-list-container {
+                padding-top: 0.25rem;
+            }
         }
     }
 }
+

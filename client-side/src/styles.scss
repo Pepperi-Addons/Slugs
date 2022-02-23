@@ -1,5 +1,45 @@
+@use '~@pepperi-addons/ngx-lib/src/core/style/abstracts/variables';
+@use '~@pepperi-addons/ngx-lib/src/core/style/abstracts/mixins';
+@use '~@pepperi-addons/ngx-lib/src/core/style/abstracts/functions';
+
 /* You can add global styles to this file, and also import other style files */
 html {
-
+    body.inheritCursors * {
+        cursor: inherit !important;
+    }
 }
 
+@mixin mapped-slug-item-container() {
+    width: 600px;
+    height: 6rem;
+    border-radius: variables.$border-radius-md;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-inline: variables.$spacing-lg;
+}
+
+@mixin mapped-slug-container() {
+    @include mapped-slug-item-container();
+    @include mixins.state-regular-default(true);
+    gap: variables.$double-content-margin;
+
+    .fields-wrapper {
+        display: grid;
+        width: 100%;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 0.5rem;
+        padding-top: 0.5rem;
+
+        // To align with the other fields.
+        .del-button {
+            margin-top: variables.$form-field-title-height;
+        }
+    }
+}
+
+.cdk-drag-preview {
+    &.mapped-slug-container {
+        @include mapped-slug-container();
+    }
+}

@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { Component } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { AddonComponent } from './addon/addon.component';
-import { TodoForm } from './addon/form/todo-form.component';
+import { ManageSlugs } from './addon/form/manage-slugs.component';
 
 // Important for single spa
 @Component({
@@ -20,8 +20,8 @@ const routes: Routes = [
                 component: AddonComponent,
             },
             {
-                path: 'todos/:todo_uuid',
-                component: TodoForm
+                path: 'slugs/:dataview_id',
+                component: ManageSlugs
             }
         ]
     },

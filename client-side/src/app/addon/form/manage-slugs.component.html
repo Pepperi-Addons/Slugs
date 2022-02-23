@@ -1,0 +1,64 @@
+<pep-page-layout >
+    <ng-container pep-top-area>
+        <pep-top-bar [title]="('MANAGE_SLUG.TITLE_PREFIX' | translate) + title">
+            <div header-end-content>
+                <pep-button class="pep-spacing-element" [value]="'Cancel' | translate" (buttonClick)="backClicked()"></pep-button>
+                <pep-button class="pep-spacing-element" [value]="'Save' | translate" [styleType]="'strong'" (buttonClick)="saveClicked()"></pep-button>
+            </div>
+        </pep-top-bar>
+    </ng-container>
+    <ng-container pep-main-area>
+        <div class="mapped-slugs-container">
+            <div class="available-slugs-side-area">
+                <pep-draggable-items [items]="availableSlugs" [title]="'MANAGE_SLUG.AVAILABLE_SLUGS' | translate" titleType="with-bottom-border" titleSizeType="md"
+                    itemPlaceholderType="weak" [showSearch]="true" [dropAreaIds]="['emptyDropArea', 'mappedSlugs']">
+                </pep-draggable-items>
+            </div>
+            <div pep-main-area class="mapped-slugs-main-area">
+                <div class="mapped-slugs-top-area pep-border-bottom"
+                    [title]="('MANAGE_SLUG.MAPPED_SLUGS_TITLE' | translate) + ' ' + ('MANAGE_SLUG.MAPPED_SLUGS_TITLE_HINT' | translate)">
+                    <span class="title-md">{{'MANAGE_SLUG.MAPPED_SLUGS_TITLE' | translate}}&nbsp;</span>
+                    <span class="color-dimmed">{{('MANAGE_SLUG.MAPPED_SLUGS_TITLE_HINT' | translate)}}
+                    </span>
+                </div>
+
+                <div>
+                    <ng-container *ngIf="mappedSlugs === null || mappedSlugs.length === 0; then emptyTemplate; else notEmptyTemplate"></ng-container>
+                    <ng-template #emptyTemplate>
+                        <div id="emptyDropArea" class="drop-slug-here-area" cdkDropList (cdkDropListDropped)="onDropSlug($event)">
+                            <mat-icon class="pep-spacing-element">
+                                <pep-icon name="arrow_down_alt"></pep-icon>
+                            </mat-icon>
+                            <span class="body-sm ellipsis">
+                                {{ 'MANAGE_SLUG.EMPTY_DROP_AREA_TEXT' | translate }}
+                            </span> 
+                        </div>
+                    </ng-template>
+                    <ng-template #notEmptyTemplate>
+                        <div id="mappedSlugs" class="mapped-slugs-area" cdkDropList [cdkDropListData]="mappedSlugs" (cdkDropListDropped)="onDropSlug($event)">
+                            <div *ngFor="let mappedSlug of mappedSlugs; let i = index" class="mapped-slug-container" cdkDrag (cdkDragStarted)="onDragStart($event)" (cdkDragEnded)="onDragEnd($event)">
+                                <ng-container *ngTemplateOutlet="mappedSlugTemplate; context: {mappedSlug: mappedSlug}"></ng-container>
+                            </div>
+                        </div>
+                    </ng-template>
+
+                    <!-- {{ mappedSlugs | json}} -->
+                </div>
+            </div>
+        </div>
+    </ng-container>
+</pep-page-layout>
+
+<ng-template #mappedSlugTemplate let-mappedSlug="mappedSlug">
+    <div class="fields-wrapper">
+        <pep-textbox [label]="'MANAGE_SLUG.SLUG_TITLE' | translate" [value]="mappedSlug.slug" [disabled]="true">
+        </pep-textbox>
+        
+        <pep-select [label]="'MANAGE_SLUG.SELECT_PAGE_TITLE' | translate"
+            [options]='pagesOptions' [value]="mappedSlug.pageKey" [emptyOption]="false"
+            (valueChange)="onPageChanged($event, mappedSlug)">
+        </pep-select>
+
+        <pep-button class="del-button" iconName="system_bin" (buttonClick)="onDeleteMappedSlug($event, mappedSlug)"></pep-button>
+    </div>
+</ng-template>

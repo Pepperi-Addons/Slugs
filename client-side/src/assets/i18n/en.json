@@ -9,7 +9,6 @@
         "SLUG": "Slug",
         "PAGE_TYPE": "Page Type"
     },
-
     "ACTIONS": {
         "CREATE_NEW_SLUG": "Create New Slug",
         "CREATE_SLUG": "Create Slug",
@@ -19,7 +18,6 @@
         "CONFIRM_DELETE": "Are you sure you want to delete this slug?",
         "DELETE": "Delete"
     },
-
     "ADD_SLUG":{
         "CREATE_NEW_TITLE": "Create a new slug",
         "EDIT_SLUG": "Edit slug",
@@ -34,7 +32,17 @@
         "KEEP_IT_SHORT": "Keep ot short, 1-5 words",
         "MAKE_READABLE": "Make them readable"
     },
-
+    "MANAGE_SLUG": {
+        "TITLE_PREFIX": "Page mapping:",
+        "AVAILABLE_SLUGS": "Available slugs",
+        "MAPPED_SLUGS_TITLE": "Mapped slugs",
+        "MAPPED_SLUGS_TITLE_HINT": "(Drag & Drop anywhere from available slugs)",
+        "EMPTY_DROP_AREA_TEXT": "Drop here from available slugs",
+        "SLUG_TITLE": "Slug",
+        "SAVED_DIALOG_TITLE": "Info",
+        "SAVED_DIALOG_CONTENT": "The mapped slugs are saved.",
+        "SELECT_PAGE_TITLE": "Select page"
+    },
     "VALIDATION": {
         "EMPTY_SLUG": "Slug can't be empty",
         "WHITE_SPACES_MSG": "White spaces are not allowed",
