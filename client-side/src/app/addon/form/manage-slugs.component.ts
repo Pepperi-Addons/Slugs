@@ -8,6 +8,7 @@ import { CdkDragDrop, CdkDragEnd, CdkDragStart, copyArrayItem, moveItemInArray }
 import { IPepOption } from '@pepperi-addons/ngx-lib';
 import { IPepButtonClickEvent } from '@pepperi-addons/ngx-lib/button';
 import { Page } from '@pepperi-addons/papi-sdk';
+import { Slug } from '../addon.model';
 
 interface IMappedSlug {
     slug: string;
@@ -47,7 +48,7 @@ export class ManageSlugs implements OnInit {
         //     { title: '/test', data: '/test', disabled: true },
         // ];
 
-        this.addonService.getSlugs().then(slugs => {
+        this.addonService.getSlugs().then((slugs: Slug[]) => {
             this.availableSlugs = slugs.map(slug => {
                 return { title: slug.Slug, data: slug.Slug }
             });
@@ -86,9 +87,9 @@ export class ManageSlugs implements OnInit {
     private addNewSlug(draggableItem: IPepDraggableItem, index: number) {
         this.setAvailableSlugPermission(draggableItem.data, true);
 
-        // Add new slug to the mappedSlugs.
-        const slug = { slug: draggableItem.data };
-        this.mappedSlugs.splice(index, 0, slug);
+        // Add new mappedSlug to the mappedSlugs.
+        const mappedSlug = { slug: draggableItem.data };
+        this.mappedSlugs.splice(index, 0, mappedSlug);
     }
 
     private changeCursorOnDragStart() {
@@ -110,7 +111,8 @@ export class ManageSlugs implements OnInit {
     goBack() {
         this.router.navigate(['..'], {
             relativeTo: this.activatedRoute,
-            queryParamsHandling: 'preserve'
+            queryParams: { tabIndex: 1 },
+            queryParamsHandling: 'merge'
         });
     }
 

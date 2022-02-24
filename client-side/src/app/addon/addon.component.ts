@@ -1,18 +1,21 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from "@angular/core";
-import { ObjectsDataRow, PepLayoutService, PepScreenSizeType } from '@pepperi-addons/ngx-lib';
+import { ObjectsDataRow, PepLayoutService, PepScreenSizeType, PepUtilitiesService } from '@pepperi-addons/ngx-lib';
 import { TranslateService } from '@ngx-translate/core';
 import { AddonService } from "../services/addon.service";
 // import { GenericListComponent, GenericListDataSource } from "@pepperi-addons/ngx-composite-lib/generic-list";
 import { GenericListComponent, IPepGenericListDataSource, IPepGenericListPager, IPepGenericListActions, IPepGenericListInitData, PepGenericListService } from "@pepperi-addons/ngx-composite-lib/generic-list";
-import { ActivatedRoute, Router } from "@angular/router";
+import { ActivatedRoute, NavigationEnd, Router } from "@angular/router";
 import { IPepFormFieldClickEvent } from "@pepperi-addons/ngx-lib/form";
 import { PepDialogActionButton, PepDialogData, PepDialogService } from "@pepperi-addons/ngx-lib/dialog";
-import { AddSlugComponent, ISlug } from '../addon/Components/Add-Slug/add-slug.component';
+import { AddSlugComponent } from '../addon/Components/Add-Slug/add-slug.component';
 import { MatDialogRef } from "@angular/material/dialog";
 import { PepSelectionData } from "@pepperi-addons/ngx-lib/list";
 import { GridDataViewField } from "@pepperi-addons/papi-sdk";
 import { IPepProfileDataViewsCard, IPepProfile, IPepProfileDataView, IPepProfileDataViewClickEvent } from '@pepperi-addons/ngx-lib/profile-data-views-list';
 import { sys } from "typescript";
+import { Slug } from "./addon.model";
+import { MatTabChangeEvent } from "@angular/material/tabs";
+import { filter } from 'rxjs/operators';
 
 @Component({
     selector: 'addon-module',
@@ -21,8 +24,10 @@ import { sys } from "typescript";
     providers: [AddSlugComponent]
 })
 export class AddonComponent implements OnInit {
+    currentTabIndex: number = 0;
+
     // Slugs tab variables
-    dataSource: IPepGenericListDataSource;
+    dataSource: IPepGenericListDataSource = null;
     slugsList: Array<any>;
     screenSize: PepScreenSizeType;
     slugSelectionData: PepSelectionData;
@@ -36,18 +41,30 @@ export class AddonComponent implements OnInit {
     constructor(
         public addonService: AddonService,
         public router: Router,
-        public route: ActivatedRoute,
+        public activatedRoute: ActivatedRoute,
         public layoutService: PepLayoutService,
         public translate: TranslateService,
         public dialogService: PepDialogService,
+        public utilitiesService: PepUtilitiesService,
         private genericListService: PepGenericListService,
        
     ) {
-        this.dataSource = this.setDataSource();
         
         this.layoutService.onResize$.subscribe(size => {
             this.screenSize = size;
         });
+        
+        const index = this.utilitiesService.coerceNumberProperty(this.activatedRoute.snapshot.queryParamMap.get('tabIndex'), 0);
+        this.setCurrentTabIndex(index);
+    }
+
+    private setCurrentTabIndex(index: number) {
+        this.currentTabIndex = index;
+
+        // Load the datasource only if not loaded already and the current tab is the first tab.
+        if (this.currentTabIndex === 0 && this.dataSource === null) {
+            this.dataSource = this.setDataSource();
+        }
     }
 
     ngOnInit() {
@@ -59,7 +76,20 @@ export class AddonComponent implements OnInit {
             index: 0
         };
     }
-
+    
+    // -----------------------------------------------------------------------------
+    //                              Tabs
+    // -----------------------------------------------------------------------------
+    onTabChanged(tabChangeEvent: MatTabChangeEvent): void {
+        this.setCurrentTabIndex(tabChangeEvent.index);
+        
+        this.router.navigate([], {
+            relativeTo: this.activatedRoute,
+            queryParams: { tabIndex: this.currentTabIndex }, 
+            queryParamsHandling: 'merge', // remove to replace all query params by provided
+        });
+    }
+    
     // -----------------------------------------------------------------------------
     //                              Slugs tab
     // -----------------------------------------------------------------------------
@@ -168,7 +198,7 @@ export class AddonComponent implements OnInit {
         }
     }
 
-    openSlugDLG(slug: ISlug = null){
+    openSlugDLG(slug: Slug = null){
        
         this.openDialog(AddSlugComponent,(res) => {
             if(res){
@@ -220,7 +250,7 @@ export class AddonComponent implements OnInit {
 
         if(this.checkIfSlugsCanBeAmended('edit')){
             let dr: ObjectsDataRow = this.genericListService.getItemById(keys[0]);
-            let slug = new ISlug();
+            let slug = new Slug();
             
                 slug.Name = dr.Fields[0].FormattedValue;
                 slug.Description = dr.Fields[1].FormattedValue;
@@ -348,7 +378,10 @@ export class AddonComponent implements OnInit {
     
     private navigateToManageSlugsDataview(dataviewId: string) {
         this.router.navigate([dataviewId], {
-            relativeTo: this.route,
+            relativeTo: this.activatedRoute,
+            queryParams: {
+                'tabIndex': null
+            },
             queryParamsHandling: 'merge'
         });
     }
