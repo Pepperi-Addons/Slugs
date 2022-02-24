@@ -7,6 +7,7 @@ import { IPepDraggableItem } from '@pepperi-addons/ngx-lib/draggable-items';
 import { CdkDragDrop, CdkDragEnd, CdkDragStart, copyArrayItem, moveItemInArray } from '@angular/cdk/drag-drop';
 import { IPepOption } from '@pepperi-addons/ngx-lib';
 import { IPepButtonClickEvent } from '@pepperi-addons/ngx-lib/button';
+import { Page } from '@pepperi-addons/papi-sdk';
 
 interface IMappedSlug {
     slug: string;
@@ -31,24 +32,26 @@ export class ManageSlugs implements OnInit {
         public router: Router,
         public activatedRoute: ActivatedRoute
     ) {
-
-        // this.layoutService.onResize$.subscribe(size => {
-        //     this.screenSize = size;
-        // });
-
         this.dataviewId = this.activatedRoute.snapshot.params["dataview_id"];
     }
 
     // TODO: Implement this
     private loadAvailableSlugs(): void {
-        this.availableSlugs = [
-            { title: '/homepage', data: '/homepage' },
-            { title: '/dashboard', data: '/dashboard' },
-            { title: '/sales', data: '/sales' },
-            { title: '/promotions', data: '/promotions' },
-            { title: '/checkout', data: '/checkout' },
-            { title: '/test', data: '/test', disabled: true },
-        ];
+
+        // this.availableSlugs = [
+        //     { title: '/homepage', data: '/homepage' },
+        //     { title: '/dashboard', data: '/dashboard' },
+        //     { title: '/sales', data: '/sales' },
+        //     { title: '/promotions', data: '/promotions' },
+        //     { title: '/checkout', data: '/checkout' },
+        //     { title: '/test', data: '/test', disabled: true },
+        // ];
+
+        this.addonService.getSlugs().then(slugs => {
+            this.availableSlugs = slugs.map(slug => {
+                return { title: slug.Slug, data: slug.Slug }
+            });
+        });
     }
 
     // TODO: Get the dataview by id.
@@ -58,10 +61,16 @@ export class ManageSlugs implements OnInit {
 
     // TODO: load the pages id & names.
     private loadPagesOptions(): void {
-        this.pagesOptions = [
-            { key: '1', value: 'test page 1'},
-            { key: '2', value: 'test page 2'}
-        ]
+        this.addonService.getPages().then((pages: Page[]) => {
+            this.pagesOptions = pages.map(page => {
+                return { key: page.Key, value: page.Name }
+            });
+            
+            // [
+            //     { key: '1', value: 'test page 1'},
+            //     { key: '2', value: 'test page 2'}
+            // ]
+        })
     }
 
     private setAvailableSlugPermission(slug: string, disable: boolean) {

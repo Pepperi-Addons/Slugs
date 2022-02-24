@@ -13,6 +13,12 @@ import { PepSelectionData } from '@pepperi-addons/ngx-lib/list';
 @Injectable({ providedIn: 'root' })
 export class AddonService {
 
+    private _systemSlugs = [{ Name: 'Homepage', Description: 'Default home page', Key: '98765' , Slug: '/homepage' }];
+
+    get systemSlugs() {
+        return this._systemSlugs.slice();
+    }
+
     addonURL = '';
     accessToken = '';
     parsedToken: any
@@ -40,15 +46,28 @@ export class AddonService {
         this.papiBaseURL = this.parsedToken["pepperi.baseurl"];
     }
 
-    getSlugs(query?: string) {
+    async getSlugs(query?: string) {
         // query = '?where=Slug="avner666"';
         if (query) { 
             this.addonURL = this.addonURL + query;
-        }    
-        return this.papiClient.get(encodeURI(this.addonURL)); 
+        }
+
+        const userSlugs = await this.papiClient.get(encodeURI(this.addonURL));
+
+        //add default homepage slug to the list 
+        this.systemSlugs.forEach(sysSlug  => {
+            let slug = new ISlug(sysSlug.Name, sysSlug.Description, sysSlug.Slug, sysSlug.Key, false);
+            userSlugs.unshift(slug);
+
+            return userSlugs;
+        });
+        
+        return Promise.resolve(userSlugs);
     }
 
-   
+    async getPages() {
+        return await this.pepHttp.getPapiApiCall('/pages').toPromise();
+    }
     
     async upsertSlug(slug: ISlug, isDelete: boolean = false, selectedObj: PepSelectionData = null, callback = null){
 

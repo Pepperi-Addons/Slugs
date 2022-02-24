@@ -26,7 +26,6 @@ export class AddonComponent implements OnInit {
     slugsList: Array<any>;
     screenSize: PepScreenSizeType;
     slugSelectionData: PepSelectionData;
-    private systemSlugs = [{ Name: 'Homepage', Description: 'Default home page', Key: '98765' , Slug: '/homepage' }];
     public pager: IPepGenericListPager;
 
     // Mapping tab variables
@@ -110,12 +109,6 @@ export class AddonComponent implements OnInit {
             init: async (state) => {
                 this.slugsList = await this.addonService.getSlugs();
                 
-                //add default homepage slug to the list 
-                this.systemSlugs.forEach( sysSlug  => {
-                    let slug = new ISlug(sysSlug.Name, sysSlug.Description, sysSlug.Slug, sysSlug.Key, false);
-                    this.slugsList.unshift(slug);
-                });
-
                 if (state.searchString != "") {
                   //res = res.filter(collection => collection.Name.toLowerCase().includes(state.searchString.toLowerCase()))
                 }
@@ -275,7 +268,7 @@ export class AddonComponent implements OnInit {
             ret = false;
         }
         else{
-            this.systemSlugs.forEach( sysSlug  => {
+            this.addonService.systemSlugs.forEach( sysSlug  => {
                 
                 if(deleteType === 'include' && this.slugSelectionData.rows.includes(sysSlug.Key)){
                     ret = false;
