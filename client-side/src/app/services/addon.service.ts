@@ -4,14 +4,20 @@ import { PapiClient } from '@pepperi-addons/papi-sdk';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http'
 import { PepHttpService, PepSessionService } from '@pepperi-addons/ngx-lib';
-import { ISlug } from '../addon/Components/Add-Slug/add-slug.component';
 import { config } from 'addon.config';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { PepSelectionData } from '@pepperi-addons/ngx-lib/list';
+import { Slug } from '../addon/addon.model';
 
 
 @Injectable({ providedIn: 'root' })
 export class AddonService {
+
+    private _systemSlugs = [{ Name: 'Homepage', Description: 'Default home page', Key: '98765' , Slug: '/homepage' }];
+
+    get systemSlugs() {
+        return this._systemSlugs.slice();
+    }
 
     addonURL = '';
     accessToken = '';
@@ -28,8 +34,6 @@ export class AddonService {
         })
     }
 
-
-
     constructor(
         public session:  PepSessionService,
         private httpClient: HttpClient,
@@ -42,17 +46,30 @@ export class AddonService {
         this.papiBaseURL = this.parsedToken["pepperi.baseurl"];
     }
 
-    getSlugs(query?: string) {
+    async getSlugs(query?: string) {
         // query = '?where=Slug="avner666"';
         if (query) { 
             this.addonURL = this.addonURL + query;
-        }    
-        return this.papiClient.get(encodeURI(this.addonURL)); 
+        }
+
+        const userSlugs = await this.papiClient.get(encodeURI(this.addonURL));
+
+        //add default homepage slug to the list 
+        this.systemSlugs.forEach((sysSlug: Slug)  => {
+            let slug = new Slug(sysSlug.Name, sysSlug.Description, sysSlug.Slug, sysSlug.Key, false);
+            userSlugs.unshift(slug);
+
+            return userSlugs;
+        });
+        
+        return Promise.resolve(userSlugs);
     }
 
-   
+    async getPages() {
+        return await this.pepHttp.getPapiApiCall('/pages').toPromise();
+    }
     
-    async upsertSlug(slug: ISlug, isDelete: boolean = false, selectedObj: PepSelectionData = null, callback = null){
+    async upsertSlug(slug: Slug, isDelete: boolean = false, selectedObj: PepSelectionData = null, callback = null){
 
         return new Promise(async (resolve, reject) => {
 

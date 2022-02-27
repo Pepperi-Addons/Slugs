@@ -6,17 +6,23 @@
     </ng-container>
 
     <ng-container pep-main-area>
-        <mat-tab-group  #tabGroup class="editor-tabs" animationDuration="0ms">
+        <mat-tab-group #tabGroup class="editor-tabs" animationDuration="0ms" [selectedIndex]="currentTabIndex" (selectedTabChange)="onTabChanged($event)">
             <mat-tab label="{{'SLUGS' | translate}}">
                 <pep-generic-list title="{{'SLUGS' | translate}}" [selectionType]="'multi'"  [uuidMapping]="'Key'" [showTopBar]='true'
-                [inline]="true" [actions]="actions" [pager]="pager" [dataSource]="dataSource"  (fieldClick)="onCustomizeFieldClick($event)"
-                [noDataFoundMsg]="'NO_DATA' | translate">
-                <div right-buttons>
-                    <pep-button [value]="'ACTIONS.CREATE_SLUG' | translate" [styleType]="'strong'" sizeType="sm"  (buttonClick)="openSlugDLG($event);" class="pep-spacing-element pull-left flip"></pep-button>
-                </div>
-            </pep-generic-list>
+                    [inline]="true" [actions]="actions" [pager]="pager" [dataSource]="dataSource" (fieldClick)="onCustomizeFieldClick($event)"
+                    [noDataFoundMsg]="'NO_DATA' | translate">
+                    <div right-buttons>
+                        <pep-button [value]="'ACTIONS.CREATE_SLUG' | translate" [styleType]="'strong'" sizeType="sm"  (buttonClick)="openSlugDLG($event);" class="pep-spacing-element pull-left flip"></pep-button>
+                    </div>
+                </pep-generic-list>
             </mat-tab>
-            <mat-tab label="{{'MAPPING' | translate}}">
+            <mat-tab class="mapping" label="{{'MAPPING' | translate}}">
+                <pep-profile-data-views-list [profileDataViewsList]="profileDataViewsList"
+                    [availableProfiles]="availableProfiles"
+                    [defaultProfile]="defaultProfile" (dataViewEditClick)="onDataViewEditClicked($event)"
+                    (dataViewDeleteClick)="onDataViewDeleteClicked($event)" (saveNewProfileClick)="onSaveNewProfileClicked($event)">
+
+                </pep-profile-data-views-list>
             </mat-tab>
         </mat-tab-group>
         

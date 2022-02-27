@@ -26,10 +26,8 @@ export class SlugsService {
         return await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).find(options);
     }
 
-    async upsertSlug(body){
-
-        if(body.isDelete){
-            
+    async upsertSlug(body) {
+        if(body.isDelete) {
             const query = `?where=Hidden=false`;
             // get list of slugs & filter by slug field
             const slugList = await this.getSlugsList(query);
@@ -47,34 +45,33 @@ export class SlugsService {
 
                         await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).upsert(tmpBody);
                     }
-                    else{
+                    else {
                         throw new Error(`System slug ${slugList[i].Slug} can't be deleted`);
                     }
                 }
             }
 
-            return{
+            return {
                 success: true
             }
         }
-        else{
+        else {
+            const slugToUpsert = this.getBody(body.slug);
 
-            body = this.getBody(body.slug);
-
-            if(body.Key === '98765'){
-                throw new Error(`System slug ${body.Slug} can't be deleted`);
+            if(slugToUpsert.Key === '98765'){
+                throw new Error(`System slug ${slugToUpsert.Slug} can't be deleted`);
             }
-            if(body.Name === '' || body.Slug === ''){
+            if(slugToUpsert.Name === '' || slugToUpsert.Slug === ''){
                 throw new Error(`Name & Slug fields can't be empty.`);  
             }
 
             // change the slug field to lowercase and remove white spaces
-            body.Slug = body.Slug.replace(/\s/g, "").toLowerCase(); 
+            slugToUpsert.Slug = slugToUpsert.Slug.replace(/\s/g, "").toLowerCase(); 
 
             // Add new Slug
-            if(body.Key === null){
+            if(slugToUpsert.Key === null){
                 
-                const query = `?where=Slug=${body.Slug}&Hidden=false`;
+                const query = `?where=Slug=${slugToUpsert.Slug}&Hidden=false`;
                 // get list of slugs & filter by slug field
                 const slugList = await this.getSlugsList(query);
 
@@ -82,27 +79,27 @@ export class SlugsService {
                 if(slugList.length === 0){
                     
                     // add Key if need ( for create new )
-                    body.Key = uuid();
+                    slugToUpsert.Key = uuid();
                     
                     // create new slug
                     return {
                         success: true,
-                        body: await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).upsert(body)
+                        body: await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).upsert(slugToUpsert)
                     }
                 }
                 else{
                     return {
                         success: false,
-                        message: `Slug ${body.Slug} allready exists`
+                        message: `Slug ${slugToUpsert.Slug} already exists`
                     }
                 }
             }
-            else{
-                    // Update slug or Delete from API slug 
-                    return {
-                        success: true,
-                        body: await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).upsert(body)
-                    }
+            else {
+                // Update slug or Delete from API slug 
+                return {
+                    success: true,
+                    body: await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).upsert(slugToUpsert)
+                }
             } 
         }
     }

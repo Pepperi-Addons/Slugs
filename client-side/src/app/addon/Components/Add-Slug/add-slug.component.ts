@@ -2,27 +2,7 @@ import { Component, OnInit, Injectable, Input, Output, EventEmitter, Optional, I
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { AddonService } from 'src/app/services/addon.service';
-
-export class ISlug {
-    Name: string;
-    Description: string;
-    //PageType: string = '';
-    Slug: string;
-    Hidden: boolean;
-    Key: string;
-    ModificationDateTime: string;
-    CreationDateTime: string;
-
-    constructor(name='', description='', slug='', key=null, hidden = false , modificationDateTime = new Date().toISOString(), creationDateTime = new Date().toISOString()){
-        this.Name = name;
-        this.Description = description;
-        this.Slug = slug;
-        this.Key = key;
-        this.Hidden = hidden;
-        this.ModificationDateTime = modificationDateTime;
-        this.CreationDateTime = creationDateTime;
-    }
-}
+import { Slug } from '../../addon.model';
 
 @Component({
     selector: 'add-slug',
@@ -33,7 +13,7 @@ export class ISlug {
 @Injectable()
 export class AddSlugComponent implements OnInit {
     
-    @Input() slug: ISlug = new ISlug();
+    @Input() slug: Slug = new Slug();
     @Input() pageTypes: Array<string> = [];
 
     public isModified: boolean = false;
@@ -51,7 +31,7 @@ export class AddSlugComponent implements OnInit {
         this.isModified = this.data?.slug?.Key ? true : false;
         this.dlgHeader = this.isModified ? this.translate.instant("ADD_SLUG.EDIT_SLUG") : this.translate.instant("ADD_SLUG.CREATE_NEW_TITLE");
         
-        this.slug = this.data?.slug || new ISlug();
+        this.slug = this.data?.slug || new Slug();
     }
 
     close(event){
