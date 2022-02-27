@@ -1,3 +1,7 @@
+export interface IMappedSlug {
+    slug: string;
+    pageKey?: string;
+}
 export class Slug {
     Key: string;
     Name: string;

@@ -2,20 +2,18 @@ import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from "@angu
 import { ObjectsDataRow, PepLayoutService, PepScreenSizeType, PepUtilitiesService } from '@pepperi-addons/ngx-lib';
 import { TranslateService } from '@ngx-translate/core';
 import { AddonService } from "../services/addon.service";
-// import { GenericListComponent, GenericListDataSource } from "@pepperi-addons/ngx-composite-lib/generic-list";
-import { GenericListComponent, IPepGenericListDataSource, IPepGenericListPager, IPepGenericListActions, IPepGenericListInitData, PepGenericListService } from "@pepperi-addons/ngx-composite-lib/generic-list";
+import { IPepGenericListDataSource, IPepGenericListPager, IPepGenericListActions, IPepGenericListInitData, PepGenericListService } from "@pepperi-addons/ngx-composite-lib/generic-list";
 import { ActivatedRoute, NavigationEnd, Router } from "@angular/router";
 import { IPepFormFieldClickEvent } from "@pepperi-addons/ngx-lib/form";
-import { PepDialogActionButton, PepDialogData, PepDialogService } from "@pepperi-addons/ngx-lib/dialog";
+import { PepDialogData, PepDialogService } from "@pepperi-addons/ngx-lib/dialog";
 import { AddSlugComponent } from '../addon/Components/Add-Slug/add-slug.component';
 import { MatDialogRef } from "@angular/material/dialog";
 import { PepSelectionData } from "@pepperi-addons/ngx-lib/list";
-import { GridDataViewField } from "@pepperi-addons/papi-sdk";
-import { IPepProfileDataViewsCard, IPepProfile, IPepProfileDataView, IPepProfileDataViewClickEvent } from '@pepperi-addons/ngx-lib/profile-data-views-list';
-import { sys } from "typescript";
+import { IPepOption } from '@pepperi-addons/ngx-lib';
+import { GridDataViewField, MenuDataView, Page, Profile } from "@pepperi-addons/papi-sdk";
+import { IPepProfileDataViewsCard, IPepProfile, IPepProfileDataViewClickEvent, IPepProfileDataView } from '@pepperi-addons/ngx-lib/profile-data-views-list';
 import { Slug } from "./addon.model";
 import { MatTabChangeEvent } from "@angular/material/tabs";
-import { filter } from 'rxjs/operators';
 
 @Component({
     selector: 'addon-module',
@@ -34,7 +32,9 @@ export class AddonComponent implements OnInit {
     public pager: IPepGenericListPager;
 
     // Mapping tab variables
-    defaultProfile: IPepProfileDataViewsCard;
+    private pagesMap = new Map<string, string>();
+    private dataViewsMap = new Map<string, MenuDataView>();
+    defaultProfileId: string = '';
     availableProfiles: Array<IPepProfile> = [];
     profileDataViewsList: Array<IPepProfileDataViewsCard> = [];
 
@@ -68,7 +68,7 @@ export class AddonComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.setProfiles();
+        this.loadDataViewsAndProfiles();
 
         this.pager = {
             type: 'pages',
@@ -333,51 +333,80 @@ export class AddonComponent implements OnInit {
     // -----------------------------------------------------------------------------
     //                              Mappings tab
     // -----------------------------------------------------------------------------
-    // TODO: Implement this
-    private setProfiles() {
-        const repDataViews: IPepProfileDataView[] = [{
-            dataViewId: '1',
-            fields: ['field1', 'field2'],
-            viewType: 'Landscape'
-        }];
+    private createDefaultSlugsDataView() {
+        const profileId: number = this.utilitiesService.coerceNumberProperty(this.defaultProfileId);
+        this.createNewSlugsDataViewForProfile(profileId);
+    }
 
-        this.defaultProfile = {
-            profileId: '123',
-            title: 'Rep 1',
-            dataViews: repDataViews
+    private createNewSlugsDataViewForProfile(profileId: number) {
+        if (profileId > 0) {
+            this.addonService.createNewSlugsDataView(profileId).then(dataView => {
+                this.createNewProfileDataViewCard(dataView);
+            });
+        }
+    }
+
+    private createNewProfileDataViewCard(dataView: MenuDataView) {
+        this.dataViewsMap.set(dataView.InternalID.toString(), dataView);
+
+        const profileDataView: IPepProfileDataViewsCard = {
+            title: dataView.Context?.Profile?.Name, // dataView.Title,
+            profileId: dataView.Context?.Profile?.InternalID.toString(),
+            dataViews: [{
+                dataViewId: dataView.InternalID.toString(),
+                viewType: dataView.Context?.ScreenSize,
+                fields: dataView.Fields?.map(field => {
+                    return `${field.FieldID} - ${this.pagesMap.get(field.Title) || ''}: (${field.Title})`;
+                })
+            }]
         };
 
-        const buyerDataViews: IPepProfileDataView[] = [{
-            dataViewId: '2',
-            fields: [],
-            viewType: 'Landscape'
-        }];
+        this.profileDataViewsList.push(profileDataView);
+    }
 
-        const profile2 = {
-            profileId: '345',
-            title: 'Buyer 1',
-            dataViews: buyerDataViews
-        };
+    private loadDataViewsAndProfiles() {
+        // Get the available profiles.
+        this.addonService.getProfiles().then((profiles: Profile[]) => {
+            if (profiles?.length > 0) {
+                this.availableProfiles = profiles.map(profile => {
+                    return { id: profile.InternalID.toString(), name: profile.Name }
+                });
 
-        this.profileDataViewsList = [this.defaultProfile, profile2];
+                const repProfile = this.availableProfiles.find(profile => profile.name.toLowerCase() === 'rep');
+                this.defaultProfileId = repProfile?.id || '';
+            }
 
-        this.availableProfiles = [{
-            id: '123',
-            name: 'Rep'
-        }, {
-            id: '1234',
-            name: 'Rep Agent'
-        }, {
-            id: '345',
-            name: 'Buyer'
-        }, {
-            id: '678',
-            name: 'Admin'
-        }]
+            // TODO: Create default for rep profile?
+            // if (this.defaultProfileId === '') {
+            // }
+        });
+
+        // Load the pages id & names.
+        this.addonService.getPages().then((pages: Page[]) => {
+            // Fill the pages map
+            pages.forEach(page => {
+                this.pagesMap.set(page.Key, page.Name);
+            });
+
+            // Get the slugs dataviews.
+            this.addonService.getSlugsDataViews().then((dataViews: MenuDataView[]) => {
+                if (dataViews?.length > 0) {
+                    this.dataViewsMap.clear();
+                    this.profileDataViewsList = [];
+
+                    // Fill the dataViews map
+                    dataViews.forEach(dataView => {
+                        this.createNewProfileDataViewCard(dataView);
+                    });
+                } else {
+                    this.createDefaultSlugsDataView();
+                }
+            });
+        });
     }
     
-    private navigateToManageSlugsDataview(dataviewId: string) {
-        this.router.navigate([dataviewId], {
+    private navigateToManageSlugsDataView(dataViewId: string) {
+        this.router.navigate([dataViewId], {
             relativeTo: this.activatedRoute,
             queryParams: {
                 'tabIndex': null
@@ -388,14 +417,20 @@ export class AddonComponent implements OnInit {
     
     onDataViewEditClicked(event: IPepProfileDataViewClickEvent): void {
         console.log(`edit on ${event.dataViewId} was clicked`);
-        this.navigateToManageSlugsDataview(event.dataViewId);
+        this.navigateToManageSlugsDataView(event.dataViewId);
     }
 
     onDataViewDeleteClicked(event: IPepProfileDataViewClickEvent): void {
         console.log(`delete on ${event.dataViewId} was clicked`);
+        const dataView = this.dataViewsMap.get(event.dataViewId);
+        if (dataView) {
+            this.addonService.deleteSlugsDataView(dataView);
+        }
     }
 
     onSaveNewProfileClicked(event: string): void {
         console.log(`save new profile was clicked for id - ${event} `);
+        const profileId: number = this.utilitiesService.coerceNumberProperty(event);
+        this.createNewSlugsDataViewForProfile(profileId);
     }
 }

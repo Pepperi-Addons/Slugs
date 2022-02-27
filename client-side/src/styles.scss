@@ -10,7 +10,7 @@ html {
 }
 
 @mixin mapped-slug-item-container() {
-    width: 600px;
+    max-width: 600px;
     height: 6rem;
     border-radius: variables.$border-radius-md;
     display: flex;

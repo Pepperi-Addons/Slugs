@@ -16,8 +16,8 @@ export async function slugs(client: Client, request: Request) {
         try {
             return service.upsertSlug(request.body);
             
-        } catch (error) {
-            throw new Error(error);
+        } catch (err) {
+            throw new Error(`Failed with error - ${err}`);
         }
     }
     else{

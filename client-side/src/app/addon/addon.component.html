@@ -19,7 +19,7 @@
             <mat-tab class="mapping" label="{{'MAPPING' | translate}}">
                 <pep-profile-data-views-list [profileDataViewsList]="profileDataViewsList"
                     [availableProfiles]="availableProfiles"
-                    [defaultProfile]="defaultProfile" (dataViewEditClick)="onDataViewEditClicked($event)"
+                    [defaultProfileId]="defaultProfileId" (dataViewEditClick)="onDataViewEditClicked($event)"
                     (dataViewDeleteClick)="onDataViewDeleteClicked($event)" (saveNewProfileClick)="onSaveNewProfileClicked($event)">
 
                 </pep-profile-data-views-list>
