@@ -132,9 +132,10 @@ export class AddonService {
             };
         
             // work on prod
-            //let distAddons = await this.pepHttp.postHttpCall(`/addons/data/${this.addonUUID}/Slugs`, body).subscribe((res) => {
+            await this.pepHttp.postPapiApiCall(`/addons/api/${this.addonUUID}/api/slugs`, body).subscribe((res) => {
+            //await this.pepHttp.postHttpCall(`/addons/data/${this.addonUUID}/slugs`, body).subscribe((res) => {
             // work on locallhost
-            await this.pepHttp.postHttpCall('http://localhost:4500/api/slugs', body).subscribe((res) => {
+            //await this.pepHttp.postHttpCall('http://localhost:4500/api/slugs', body).subscribe((res) => {
 
                 if(callback){
                     callback(res);

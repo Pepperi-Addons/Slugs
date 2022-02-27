@@ -68,7 +68,7 @@ export class SlugsService {
             // change the slug field to lowercase and remove white spaces
             slugToUpsert.Slug = slugToUpsert.Slug.replace(/\s/g, "").toLowerCase(); 
 
-            // Add new Slug
+            // Add new Slug 
             if(slugToUpsert.Key === null){
                 
                 const query = `?where=Slug=${slugToUpsert.Slug}&Hidden=false`;
