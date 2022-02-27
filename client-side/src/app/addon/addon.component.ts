@@ -108,7 +108,7 @@ export class AddonComponent implements OnInit {
                     {
                         title: this.translate.instant("ACTIONS.EDIT"),
                         handler: async (ddd) => {
-                            this.editSlug(this.slugSelectionData.rows);
+                            this.editSlug(this.slugSelectionData.rows[0]);
                         }
                     },
                     {
@@ -234,8 +234,17 @@ export class AddonComponent implements OnInit {
     }
 
     onCustomizeFieldClick(fieldClickEvent: IPepFormFieldClickEvent){
-         //let dr = this.slugsList.customList.getItemDataByID(fieldClickEvent.id);
-         this.editSlug([fieldClickEvent.id]);  
+
+        let isSysSlug = this.addonService.systemSlugs.filter(slug => {
+            return slug.Key === fieldClickEvent.id 
+        }).length > 0 ? true : false;
+
+      if(isSysSlug){
+           this.showSystemSlugMSG('edit');
+      }
+      else{
+         this.editSlug(fieldClickEvent.id, false);  
+      }
     }
     
     getAllSlugsUUID(){
@@ -246,10 +255,10 @@ export class AddonComponent implements OnInit {
         return uuids;
     }
 
-    editSlug(keys: Array<string>){
+    editSlug(key: string = null, needToValidate: boolean = true){
 
-        if(this.checkIfSlugsCanBeAmended('edit')){
-            let dr: ObjectsDataRow = this.genericListService.getItemById(keys[0]);
+        if(!needToValidate || this.checkIfSlugsCanBeAmended('edit')){
+            let dr: ObjectsDataRow = this.genericListService.getItemById(key);
             let slug = new Slug();
             
                 slug.Name = dr.Fields[0].FormattedValue;
@@ -288,9 +297,10 @@ export class AddonComponent implements OnInit {
         });
     }
 
-    checkIfSlugsCanBeAmended(oper: string){
+    checkIfSlugsCanBeAmended(oper: string, key: string = null){
         let ret = true;
 
+        
         const deleteType = this.slugSelectionData.selectionType === 1 && this.slugSelectionData.rows.length > 0 ? 'include' :
                            this.slugSelectionData.selectionType === 0 && this.slugSelectionData.rows.length === 0 ? 'all' : 'exclude';
 
@@ -311,23 +321,27 @@ export class AddonComponent implements OnInit {
         }
 
         if(!ret){
-                const dialogData = new PepDialogData({
-                    content: oper === 'delete' ? this.translate.instant('ACTIONS.CANT_DELETE') : this.translate.instant('ACTIONS.CANT_EDIT'),
-                    showHeader: false,
-                    //actionsType: this.slugSelectionData.rows.length === 1 ? 'close' : 'cancel-continue',
-                    actionsType: 'close',
-                    showClose: false,
-                });
-    
-                this.dialogService.openDefaultDialog(dialogData).afterClosed()
-                .subscribe(() => {
-                    return ret;
-                });
+            return this.showSystemSlugMSG(oper);
         }
         else{
             return ret;
         }
         
+    }
+
+    showSystemSlugMSG(oper: string){
+        const dialogData = new PepDialogData({
+            content: oper === 'delete' ? this.translate.instant('ACTIONS.CANT_DELETE') : this.translate.instant('ACTIONS.CANT_EDIT'),
+            showHeader: false,
+            //actionsType: this.slugSelectionData.rows.length === 1 ? 'close' : 'cancel-continue',
+            actionsType: 'close',
+            showClose: false,
+        });
+
+        this.dialogService.openDefaultDialog(dialogData).afterClosed()
+        .subscribe(() => {
+            return false;
+        });
     }
 
     // -----------------------------------------------------------------------------
