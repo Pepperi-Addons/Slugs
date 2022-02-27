@@ -2,8 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from "@angu
 import { ObjectsDataRow, PepLayoutService, PepScreenSizeType } from '@pepperi-addons/ngx-lib';
 import { TranslateService } from '@ngx-translate/core';
 import { AddonService } from "../services/addon.service";
-// import { GenericListComponent, GenericListDataSource } from "@pepperi-addons/ngx-composite-lib/generic-list";
-import { GenericListComponent, IPepGenericListDataSource, IPepGenericListPager, IPepGenericListActions, IPepGenericListInitData, PepGenericListService } from "@pepperi-addons/ngx-composite-lib/generic-list";
+import { IPepGenericListDataSource, IPepGenericListPager, IPepGenericListActions, IPepGenericListInitData, PepGenericListService } from "@pepperi-addons/ngx-composite-lib/generic-list";
 import { ActivatedRoute, Router } from "@angular/router";
 import { IPepFormFieldClickEvent } from "@pepperi-addons/ngx-lib/form";
 import { PepDialogActionButton, PepDialogData, PepDialogService } from "@pepperi-addons/ngx-lib/dialog";
@@ -199,6 +198,7 @@ export class AddonComponent implements OnInit {
                     }
             });
     }
+    
     onCustomizeFieldClick(fieldClickEvent: IPepFormFieldClickEvent){
          //let dr = this.slugsList.customList.getItemDataByID(fieldClickEvent.id);
          this.editSlug([fieldClickEvent.id]);  
