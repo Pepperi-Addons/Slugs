@@ -90,6 +90,9 @@ export class ManageSlugs implements OnInit {
                 });
                 this.setAvailableSlugPermission(field.FieldID, true);
             }
+        } else {
+            // TODO: Show error data view is not exist.
+            this.goBack();
         }
 
         this.isFinishLoading = true;
