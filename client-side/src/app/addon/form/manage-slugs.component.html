@@ -8,7 +8,7 @@
         </pep-top-bar>
     </ng-container>
     <ng-container pep-main-area>
-        <div class="mapped-slugs-container">
+        <div *ngIf="isFinishLoading" class="mapped-slugs-container">
             <div class="available-slugs-side-area">
                 <pep-draggable-items [items]="availableSlugs" [title]="'MANAGE_SLUG.AVAILABLE_SLUGS' | translate" titleType="with-bottom-border" titleSizeType="md"
                     itemPlaceholderType="weak" [showSearch]="true" [dropAreaIds]="['emptyDropArea', 'mappedSlugs']">

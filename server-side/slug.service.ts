@@ -1,6 +1,7 @@
-import { PapiClient, InstalledAddon, FindOptions } from '@pepperi-addons/papi-sdk'
+import { PapiClient, InstalledAddon, FindOptions, Page, MenuDataView } from '@pepperi-addons/papi-sdk'
 import { Client } from '@pepperi-addons/debug-server';
 import { v4 as uuid } from 'uuid';
+import { resolve } from 'dns';
 
 const TABLE_NAME = 'Slugs';
 
@@ -104,13 +105,13 @@ export class SlugsService {
         }
     }
 
-    getSlugsList(query: string = ''){
+    getSlugsList(query: string = '') {
         let addonURL = `/addons/data/${this.addonUUID}/Slugs` + query;
                 
         return this.papiClient.get(encodeURI(addonURL)); 
     }
 
-    getBody(slug){
+    getBody(slug) {
         return  {
             Name: slug.Name,
             Description: slug.Description,
@@ -118,6 +119,35 @@ export class SlugsService {
             Hidden: slug.Hidden || false,
             Key: slug.Key || null
         };
+    }
+
+    async getSlugsDataViewsData() {
+        const dataPromises: Promise<any>[] = [];
+
+        // Get the slugs dataviews
+        // const dataViews = await this.papiClient.metaData.dataViews.find({
+        //     where: `Context.Name='Slugs'`
+        // });
+        dataPromises.push(this.papiClient.metaData.dataViews.find({
+            where: `Context.Name='Slugs'`
+        }));
+
+        // Get the profiles
+        // const profiles = await this.papiClient.profiles.find();
+        dataPromises.push(this.papiClient.profiles.find());
+
+        // Get the pages
+        // const pages: Page[] = await this.papiClient.pages.find();
+        dataPromises.push(this.papiClient.pages.find());
+        
+        // wait for results and return them as object.
+        const arr = await Promise.all(dataPromises).then(res => res);
+        
+        return {
+            dataViews: arr[0],
+            profiles: arr[1].map(profile => { return { id: profile.InternalID.toString(), name: profile.Name } }),
+            pages: arr[2].map(page => { return { key: page.Key, name: page.Name } }), // Return projection of key & name
+        }
     }
 }
 

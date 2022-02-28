@@ -5,7 +5,7 @@ import { PepDialogData, PepDialogService } from '@pepperi-addons/ngx-lib/dialog'
 import { ActivatedRoute, Router } from '@angular/router';
 import { IPepDraggableItem } from '@pepperi-addons/ngx-lib/draggable-items';
 import { CdkDragDrop, CdkDragEnd, CdkDragStart, copyArrayItem, moveItemInArray } from '@angular/cdk/drag-drop';
-import { IPepOption } from '@pepperi-addons/ngx-lib';
+import { IPepOption, PepLoaderService } from '@pepperi-addons/ngx-lib';
 import { IPepButtonClickEvent } from '@pepperi-addons/ngx-lib/button';
 import { MenuDataView, MenuDataViewField, Page } from '@pepperi-addons/papi-sdk';
 import { IMappedSlug, Slug } from '../addon.model';
@@ -20,59 +20,20 @@ export class ManageSlugs implements OnInit {
     availableSlugs: Array<IPepDraggableItem> = [];
     mappedSlugs: Array<IMappedSlug> = [];
     pagesOptions: IPepOption[] = [];
+    isFinishLoading = false;
 
     constructor(
+        private loaderService: PepLoaderService,
         public addonService: AddonService,
         public translate: TranslateService,
         public dialogService: PepDialogService,
         public router: Router,
         public activatedRoute: ActivatedRoute
     ) {
-        //
-    }
-
-    private loadAvailableSlugs(): void {
-        // this.availableSlugs = [
-        //     { title: '/homepage', data: '/homepage' },
-        //     { title: '/dashboard', data: '/dashboard' },
-        //     { title: '/sales', data: '/sales' },
-        //     { title: '/promotions', data: '/promotions' },
-        //     { title: '/checkout', data: '/checkout' },
-        //     { title: '/test', data: '/test', disabled: true },
-        // ];
-
-        this.addonService.getSlugs().then((slugs: Slug[]) => {
-            this.availableSlugs = slugs.map(slug => {
-                return { title: slug.Slug, data: slug.Slug }
-            });
-        });
-    }
-
-    private loadSlugsDataView(): void {
-        // Load the dataview by id and set all the mappedSlugs array.
-        this.mappedSlugs = [];
-        const dataViewId = this.activatedRoute.snapshot.params["dataview_id"];
-        this.addonService.getSlugsDataView(dataViewId).then((dataViews: MenuDataView[]) => {
-            if (dataViews?.length === 1) {
-                this.dataView = dataViews[0];
-    
-                for (let index = 0; index < this.dataView.Fields?.length; index++) {
-                    const field = this.dataView.Fields[index];
-                    this.mappedSlugs.push({
-                        slug: field.FieldID,
-                        pageKey: field.Title
-                    });
-                    this.setAvailableSlugPermission(field.FieldID, true);
-                }
-            }
-        });
-    }
-
-    private loadPagesOptions(): void {
         // Load the pages id & names.
-        this.addonService.getPages().then((pages: Page[]) => {
-            this.pagesOptions = pages.map(page => {
-                return { key: page.Key, value: page.Name }
+        this.addonService.pagesChange$.subscribe(pages => {
+            this.pagesOptions = pages?.map(page => {
+                return { key: page.key, value: page.name }
             });
         });
     }
@@ -105,10 +66,38 @@ export class ManageSlugs implements OnInit {
         document.body.style.cursor = 'unset';
     }
     
+    private async loadData() {
+        // Load the dataview by id and set all the mappedSlugs array.
+        this.loaderService.show();
+        this.mappedSlugs = [];
+        const dataViewId = this.activatedRoute.snapshot.params["dataview_id"];
+
+        await this.addonService.getSlugs().then((slugs: Slug[]) => {
+            this.availableSlugs = slugs.map(slug => {
+                return { title: slug.Slug, data: slug.Slug }
+            });
+        });
+
+        const dataViews: MenuDataView[] = await this.addonService.getSlugsDataView(dataViewId);
+        if (dataViews?.length === 1) {
+            this.dataView = dataViews[0];
+
+            for (let index = 0; index < this.dataView.Fields?.length; index++) {
+                const field = this.dataView.Fields[index];
+                this.mappedSlugs.push({
+                    slug: field.FieldID,
+                    pageKey: field.Title
+                });
+                this.setAvailableSlugPermission(field.FieldID, true);
+            }
+        }
+
+        this.isFinishLoading = true;
+        this.loaderService.hide();
+    }
+
     ngOnInit() {
-        this.loadSlugsDataView();
-        this.loadAvailableSlugs();
-        this.loadPagesOptions();
+        this.loadData();
     }
 
     goBack() {
@@ -138,24 +127,15 @@ export class ManageSlugs implements OnInit {
         });
         
         this.dataView.Fields = fields;
-        this.addonService.saveSlugsDataView(this.dataView).then(dataView => {
-            // If success.
+
+        this.addonService.saveSlugsDataView(this.dataView).then(res => {
             this.dialogService.openDefaultDialog(new PepDialogData({
-                title: this.translate.instant('MANAGE_SLUG.SAVED_DIALOG_INFO_TITLE'),
-                content: this.translate.instant('MANAGE_SLUG.SAVED_DIALOG_CONTENT')
+                title: this.translate.instant('MESSAGES.DIALOG_INFO_TITLE'),
+                content: this.translate.instant('MESSAGES.MAPPED_SLUGS_SAVED_DIALOG_CONTENT')
             })).afterClosed().subscribe(value => {
                 this.goBack();
             });
-        }).catch(err => {
-            // Show error msg
-            const errorMsg = this.translate.instant('MANAGE_SLUG.SAVED_DIALOG_ERROR_CONTENT');
-            const errorDetailsMsg = this.translate.instant('MANAGE_SLUG.SAVED_DIALOG_ERROR_DETAILS', { error: err });
-            this.dialogService.openDefaultDialog(new PepDialogData({
-                title: this.translate.instant('MANAGE_SLUG.SAVED_DIALOG_ERROR_TITLE'),
-                content: errorMsg // + ' ' + errorDetailsMsg
-            }));
         });
-
     }
 
     onDragStart(event: CdkDragStart) {

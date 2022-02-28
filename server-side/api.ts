@@ -9,10 +9,10 @@ export async function slugs(client: Client, request: Request) {
     
     const service = new SlugsService(client);
 
-    if(request.method === 'GET'){
+    if (request.method === 'GET') {
         return service.getSlugs(request.query);
     }
-    else if(request.method === 'POST'){
+    else if (request.method === 'POST') {
         try {
             return service.upsertSlug(request.body);
             
@@ -20,9 +20,18 @@ export async function slugs(client: Client, request: Request) {
             throw new Error(`Failed with error - ${err}`);
         }
     }
-    else{
+    else {
         throw new Error(`Method ${request.method} not supportded`);
     }
-};
+}
+
+export async function get_slugs_data_views_data(client: Client, request: Request): Promise<any> {
+    try {
+        const service = new SlugsService(client);
+        return service.getSlugsDataViewsData();
+    } catch(err) {
+        throw new Error(`Failed to get slugs data views data. error - ${err}`);
+    }
+}
 
 
