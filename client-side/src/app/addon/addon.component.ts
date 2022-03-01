@@ -2,20 +2,18 @@ import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from "@angu
 import { ObjectsDataRow, PepLayoutService, PepScreenSizeType, PepUtilitiesService } from '@pepperi-addons/ngx-lib';
 import { TranslateService } from '@ngx-translate/core';
 import { AddonService } from "../services/addon.service";
-// import { GenericListComponent, GenericListDataSource } from "@pepperi-addons/ngx-composite-lib/generic-list";
-import { GenericListComponent, IPepGenericListDataSource, IPepGenericListPager, IPepGenericListActions, IPepGenericListInitData, PepGenericListService } from "@pepperi-addons/ngx-composite-lib/generic-list";
+import { IPepGenericListDataSource, IPepGenericListPager, IPepGenericListActions, IPepGenericListInitData, PepGenericListService } from "@pepperi-addons/ngx-composite-lib/generic-list";
 import { ActivatedRoute, NavigationEnd, Router } from "@angular/router";
 import { IPepFormFieldClickEvent } from "@pepperi-addons/ngx-lib/form";
-import { PepDialogActionButton, PepDialogData, PepDialogService } from "@pepperi-addons/ngx-lib/dialog";
+import { PepDialogData, PepDialogService } from "@pepperi-addons/ngx-lib/dialog";
 import { AddSlugComponent } from '../addon/Components/Add-Slug/add-slug.component';
 import { MatDialogRef } from "@angular/material/dialog";
 import { PepSelectionData } from "@pepperi-addons/ngx-lib/list";
-import { GridDataViewField } from "@pepperi-addons/papi-sdk";
-import { IPepProfileDataViewsCard, IPepProfile, IPepProfileDataView, IPepProfileDataViewClickEvent } from '@pepperi-addons/ngx-lib/profile-data-views-list';
-import { sys } from "typescript";
+import { IPepOption } from '@pepperi-addons/ngx-lib';
+import { GridDataViewField, MenuDataView, Page, Profile } from "@pepperi-addons/papi-sdk";
+import { IPepProfileDataViewsCard, IPepProfile, IPepProfileDataViewClickEvent, IPepProfileDataView } from '@pepperi-addons/ngx-lib/profile-data-views-list';
 import { Slug } from "./addon.model";
 import { MatTabChangeEvent } from "@angular/material/tabs";
-import { filter } from 'rxjs/operators';
 
 @Component({
     selector: 'addon-module',
@@ -34,8 +32,12 @@ export class AddonComponent implements OnInit {
     public pager: IPepGenericListPager;
 
     // Mapping tab variables
-    defaultProfile: IPepProfileDataViewsCard;
+    private pagesMap = new Map<string, string>();
+    private dataViewsMap = new Map<string, MenuDataView>();
+    defaultProfileId: string = '';
+    private _allProfiles: ReadonlyArray<IPepProfile> = [];
     availableProfiles: Array<IPepProfile> = [];
+    
     profileDataViewsList: Array<IPepProfileDataViewsCard> = [];
 
     constructor(
@@ -49,11 +51,37 @@ export class AddonComponent implements OnInit {
         private genericListService: PepGenericListService,
        
     ) {
-        
         this.layoutService.onResize$.subscribe(size => {
             this.screenSize = size;
         });
         
+        // Fill the pages map first (1)
+        this.addonService.pagesChange$.subscribe(pages => {
+            pages?.forEach(page => {
+                this.pagesMap.set(page.key, page.name);
+            });
+        });
+        
+        // Get the available profiles second (2).
+        this.addonService.profilesChange$.subscribe(profiles => {
+            this._allProfiles = profiles;
+
+            // After the profiles loaded the defaultProfileId is already loaded too.
+            this.defaultProfileId = this.addonService.defaultProfileId;
+        });
+
+        // Fill the data views third (3).
+        this.addonService.dataViewsMapChange$.subscribe((dataViewsMap: ReadonlyMap<string, MenuDataView>) => {
+            this.dataViewsMap = new Map<string, MenuDataView>();
+            this.profileDataViewsList = [];
+
+            dataViewsMap.forEach(dv => {
+                this.createNewProfileDataViewCard(dv);
+            });
+
+            this.availableProfiles = this._allProfiles.filter(p => this.profileDataViewsList.findIndex(pdv => pdv.profileId === p.id) === -1);
+        });
+
         const index = this.utilitiesService.coerceNumberProperty(this.activatedRoute.snapshot.queryParamMap.get('tabIndex'), 0);
         this.setCurrentTabIndex(index);
     }
@@ -68,8 +96,6 @@ export class AddonComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.setProfiles();
-
         this.pager = {
             type: 'pages',
             size: 10,
@@ -347,51 +373,33 @@ export class AddonComponent implements OnInit {
     // -----------------------------------------------------------------------------
     //                              Mappings tab
     // -----------------------------------------------------------------------------
-    // TODO: Implement this
-    private setProfiles() {
-        const repDataViews: IPepProfileDataView[] = [{
-            dataViewId: '1',
-            fields: ['field1', 'field2'],
-            viewType: 'Landscape'
-        }];
+    
+    private createNewSlugsDataViewForProfile(profileId: number) {
+        if (profileId > 0) {
+            this.addonService.createNewSlugsDataView(profileId);
+        }
+    }
 
-        this.defaultProfile = {
-            profileId: '123',
-            title: 'Rep 1',
-            dataViews: repDataViews
+    private createNewProfileDataViewCard(dataView: MenuDataView) {
+        this.dataViewsMap.set(dataView.InternalID.toString(), dataView);
+
+        const profileDataView: IPepProfileDataViewsCard = {
+            title: dataView.Context?.Profile?.Name, // dataView.Title,
+            profileId: dataView.Context?.Profile?.InternalID.toString(),
+            dataViews: [{
+                dataViewId: dataView.InternalID.toString(),
+                viewType: dataView.Context?.ScreenSize,
+                fields: dataView.Fields?.map(field => {
+                    return `${field.FieldID} - ${this.pagesMap.get(field.Title) || ''}: (${field.Title})`;
+                })
+            }]
         };
 
-        const buyerDataViews: IPepProfileDataView[] = [{
-            dataViewId: '2',
-            fields: [],
-            viewType: 'Landscape'
-        }];
-
-        const profile2 = {
-            profileId: '345',
-            title: 'Buyer 1',
-            dataViews: buyerDataViews
-        };
-
-        this.profileDataViewsList = [this.defaultProfile, profile2];
-
-        this.availableProfiles = [{
-            id: '123',
-            name: 'Rep'
-        }, {
-            id: '1234',
-            name: 'Rep Agent'
-        }, {
-            id: '345',
-            name: 'Buyer'
-        }, {
-            id: '678',
-            name: 'Admin'
-        }]
+        this.profileDataViewsList.push(profileDataView);
     }
     
-    private navigateToManageSlugsDataview(dataviewId: string) {
-        this.router.navigate([dataviewId], {
+    private navigateToManageSlugsDataView(dataViewId: string) {
+        this.router.navigate([dataViewId], {
             relativeTo: this.activatedRoute,
             queryParams: {
                 'tabIndex': null
@@ -402,14 +410,34 @@ export class AddonComponent implements OnInit {
     
     onDataViewEditClicked(event: IPepProfileDataViewClickEvent): void {
         console.log(`edit on ${event.dataViewId} was clicked`);
-        this.navigateToManageSlugsDataview(event.dataViewId);
+        this.navigateToManageSlugsDataView(event.dataViewId);
     }
 
     onDataViewDeleteClicked(event: IPepProfileDataViewClickEvent): void {
         console.log(`delete on ${event.dataViewId} was clicked`);
+        
+        this.dialogService.openDefaultDialog(new PepDialogData({
+            title: this.translate.instant('MESSAGES.DIALOG_DELETE_TITLE'),
+            content: this.translate.instant('MESSAGES.DELETE_DIALOG_CONTENT'),
+            actionsType: 'cancel-delete'
+        })).afterClosed().subscribe(isDeleteClicked => {
+            if (isDeleteClicked) {
+                const dataView = this.dataViewsMap.get(event.dataViewId);
+                if (dataView) {
+                    this.addonService.deleteSlugsDataView(dataView).then(res => {
+                        this.dialogService.openDefaultDialog(new PepDialogData({
+                            title: this.translate.instant('MESSAGES.DIALOG_INFO_TITLE'),
+                            content: this.translate.instant('MESSAGES.OPERATION_SUCCESS_CONTENT')
+                        }));
+                    });
+                }
+            }
+        });
     }
 
     onSaveNewProfileClicked(event: string): void {
         console.log(`save new profile was clicked for id - ${event} `);
+        const profileId: number = this.utilitiesService.coerceNumberProperty(event);
+        this.createNewSlugsDataViewForProfile(profileId);
     }
 }

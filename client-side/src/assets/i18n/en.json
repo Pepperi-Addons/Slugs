@@ -42,13 +42,21 @@
         "MAPPED_SLUGS_TITLE_HINT": "(Drag & Drop anywhere from available slugs)",
         "EMPTY_DROP_AREA_TEXT": "Drop here from available slugs",
         "SLUG_TITLE": "Slug",
-        "SAVED_DIALOG_TITLE": "Info",
-        "SAVED_DIALOG_CONTENT": "The mapped slugs are saved.",
         "SELECT_PAGE_TITLE": "Select page"
     },
     "VALIDATION": {
         "EMPTY_SLUG": "Slug can't be empty",
         "WHITE_SPACES_MSG": "White spaces are not allowed",
         "UPPER_CASE_MSG": "Upper case latters are not allowed"
+    },
+    "MESSAGES": {
+        "DIALOG_INFO_TITLE": "Info",
+        "DIALOG_ERROR_TITLE": "Error",
+        "DIALOG_DELETE_TITLE": "Delete",
+        "DELETE_DIALOG_CONTENT": "Are you sure?",
+        "OPERATION_SUCCESS_CONTENT": "Operation success.",
+        "MAPPED_SLUGS_SAVED_DIALOG_CONTENT": "The mapped slugs are saved.",
+        "DIALOG_ERROR_CONTENT": "General error - please contact your administrator.",
+        "DIALOG_ERROR_DETAILS": "<br/><small> Error details: {{error}} </small>"
     }
 }
