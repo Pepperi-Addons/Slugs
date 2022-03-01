@@ -35,9 +35,9 @@ export class AddonService {
                             { Name: 'Account details', Description: 'Default account details page', Key: '98765-10' , Slug: '/account_details' }
 
     ];
-    
+
     get systemSlugs() {
-        return this._systemSlugs.slice();
+        return this._systemSlugs.reverse().slice();
     }
 
     addonURL = '';
