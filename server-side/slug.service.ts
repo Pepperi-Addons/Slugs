@@ -39,7 +39,7 @@ export class SlugsService {
                   (deleteType === 'include' && body.selectedObj.rows.includes(slugList[i].Key)) || 
                   (deleteType === 'exclude' && !body.selectedObj.rows.includes(slugList[i].Key))){
                     
-                    if(slugList[i].Key !== '98765'){
+                    if(slugList[i].Key.indexOf('98765-') == -1){
                         let tmpBody = this.getBody(slugList[i]);
                         tmpBody.Hidden = true;
 
@@ -58,7 +58,7 @@ export class SlugsService {
         else {
             const slugToUpsert = this.getBody(body.slug);
 
-            if(slugToUpsert.Key === '98765'){
+            if(slugToUpsert.Key.indexOf('98765-') == 0){
                 throw new Error(`System slug ${slugToUpsert.Slug} can't be deleted`);
             }
             if(slugToUpsert.Name === '' || slugToUpsert.Slug === ''){
