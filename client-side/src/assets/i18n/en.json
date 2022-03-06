@@ -19,7 +19,7 @@
         "CONFIRM_MULTI_DELETE": "Are you sure you want to delete those slugs?",
         "DELETE": "Delete",
         "CANT_DELETE": "System slugs can’t be deleted",
-        "CANT_EDIT": "System slugs can’t be edited"
+        "CANT_EDIT": "System slugs can’t be edited" 
     },
     "ADD_SLUG":{
         "CREATE_NEW_TITLE": "Create a new slug",
@@ -33,7 +33,8 @@
         "USE_LOWERCASE": "Use lower-case",
         "INCLUDE_RELEVANT_KEYWORDS": "Include relevant keywords",
         "KEEP_IT_SHORT": "Keep ot short, 1-5 words",
-        "MAKE_READABLE": "Make them readable"
+        "MAKE_READABLE": "Make them readable",
+        "SLUG_LIMITAION_MSG" : "The number of slugs limit has been reached"
     },
     "MANAGE_SLUG": {
         "TITLE_PREFIX": "Page mapping:",

@@ -27,6 +27,7 @@ export class AddonComponent implements OnInit {
     // Slugs tab variables
     dataSource: IPepGenericListDataSource = null;
     slugsList: Array<any>;
+    slugsNumLimit = 50;
     screenSize: PepScreenSizeType;
     slugSelectionData: PepSelectionData;
     public pager: IPepGenericListPager;
@@ -226,11 +227,23 @@ export class AddonComponent implements OnInit {
 
     openSlugDLG(slug: Slug = null){
        
-        this.openDialog(AddSlugComponent,(res) => {
-            if(res){
-                this.dataSource = this.setDataSource();
-            }
-        }, {'slug': slug,});
+        // check limitation of num of slugs when add new one
+        if(!slug.hasOwnProperty('Key') && this.slugsList.length >= this.slugsNumLimit){
+            const dialogData = new PepDialogData({
+                content:  this.translate.instant('ADD_SLUG.SLUG_LIMITAION_MSG') + ' (' + this.slugsNumLimit.toString() + ')',
+                showHeader: false,
+                actionsType: 'close',
+                showClose: false,
+            });
+
+            this.dialogService.openDefaultDialog(dialogData);
+        } else {
+            this.openDialog(AddSlugComponent,(res) => {
+                if(res){
+                    this.dataSource = this.setDataSource();
+                }
+            }, {'slug': slug,});
+        }
 
     }
 
