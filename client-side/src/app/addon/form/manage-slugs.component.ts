@@ -155,9 +155,9 @@ export class ManageSlugs implements OnInit {
             this.dialogService.openDefaultDialog(new PepDialogData({
                 title: this.translate.instant('MESSAGES.DIALOG_INFO_TITLE'),
                 content: this.translate.instant('MESSAGES.MAPPED_SLUGS_UNMAPPED_ENTRIES_CONTENT'),
-                actionsType: 'cancel-continue'
-            })).afterClosed().subscribe((continuePressed) => {
-                if (continuePressed) {
+                actionsType: 'cancel-ok'
+            })).afterClosed().subscribe((okPressed) => {
+                if (okPressed) {
                     this.saveSlugsDataView(fields);
                 }
             });

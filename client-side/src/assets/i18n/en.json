@@ -55,7 +55,7 @@
         "DIALOG_DELETE_TITLE": "Delete",
         "DELETE_DIALOG_CONTENT": "Are you sure?",
         "OPERATION_SUCCESS_CONTENT": "Operation success.",
-        "MAPPED_SLUGS_UNMAPPED_ENTRIES_CONTENT": "There are unmapped entries. ‘Save’ will remove them from the list.",
+        "MAPPED_SLUGS_UNMAPPED_ENTRIES_CONTENT": "There are unmapped entries. ‘Ok’ will remove them from the list.",
         "MAPPED_SLUGS_SAVED_DIALOG_CONTENT": "The mapped slugs are saved.",
         "DIALOG_ERROR_CONTENT": "General error - please contact your administrator.",
         "DIALOG_ERROR_DETAILS": "<br/><small> Error details: {{error}} </small>"
