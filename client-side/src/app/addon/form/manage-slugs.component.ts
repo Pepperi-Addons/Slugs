@@ -75,6 +75,10 @@ export class ManageSlugs implements OnInit {
         await this.addonService.getSlugs().then((slugs: Slug[]) => {
             this.availableSlugs = slugs.map(slug => {
                 return { title: slug.Slug, data: slug.Slug }
+            }).sort((slug1, slug2) => {
+                if (slug1.title < slug2.title) { return -1; }
+                if (slug1.title > slug2.title) { return 1; }
+                return 0;
             });
         });
 
@@ -99,6 +103,18 @@ export class ManageSlugs implements OnInit {
         this.loaderService.hide();
     }
 
+    private saveSlugsDataView(fields: MenuDataViewField[]) {
+        this.dataView.Fields = fields;
+        this.addonService.saveSlugsDataView(this.dataView).then(res => {
+            this.dialogService.openDefaultDialog(new PepDialogData({
+                title: this.translate.instant('MESSAGES.DIALOG_INFO_TITLE'),
+                content: this.translate.instant('MESSAGES.MAPPED_SLUGS_SAVED_DIALOG_CONTENT')
+            })).afterClosed().subscribe(value => {
+                this.goBack();
+            });
+        });
+    }
+
     ngOnInit() {
         this.loadData();
     }
@@ -118,27 +134,36 @@ export class ManageSlugs implements OnInit {
     saveClicked() {
         // Save the current dataview.
         const fields: MenuDataViewField[] = [];
-        
-        this.mappedSlugs.forEach(mappedSlug => {
+        let showMsgNotChoosePage = false;
+
+        for (let index = 0; index < this.mappedSlugs.length; index++) {
+            const mappedSlug = this.mappedSlugs[index];
+            
             // Add the mapped slug only if the page is selected.            
             if (mappedSlug.pageKey) {
                 fields.push({
                     FieldID: mappedSlug.slug,
                     Title: mappedSlug.pageKey
                 });
+            } else {
+                showMsgNotChoosePage = true;
             }
-        });
-        
-        this.dataView.Fields = fields;
+        }
 
-        this.addonService.saveSlugsDataView(this.dataView).then(res => {
+        // Show message to the user there are slugs with no pages if u continue and save we delete those slugs from the list.        
+        if (showMsgNotChoosePage) {
             this.dialogService.openDefaultDialog(new PepDialogData({
                 title: this.translate.instant('MESSAGES.DIALOG_INFO_TITLE'),
-                content: this.translate.instant('MESSAGES.MAPPED_SLUGS_SAVED_DIALOG_CONTENT')
-            })).afterClosed().subscribe(value => {
-                this.goBack();
+                content: this.translate.instant('MESSAGES.MAPPED_SLUGS_UNMAPPED_ENTRIES_CONTENT'),
+                actionsType: 'cancel-continue'
+            })).afterClosed().subscribe((continuePressed) => {
+                if (continuePressed) {
+                    this.saveSlugsDataView(fields);
+                }
             });
-        });
+        } else {
+            this.saveSlugsDataView(fields);
+        }
     }
 
     onDragStart(event: CdkDragStart) {
