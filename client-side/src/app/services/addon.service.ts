@@ -179,11 +179,11 @@ export class AddonService {
         return Promise.resolve(userSlugs);
     }
 
-    async loadSlugsDataViewsData() {
+    loadSlugsDataViewsData() {
         this.clearData();
 
         const baseUrl = this.getBaseUrl(this.addonUUID);
-        await this.httpService.getHttpCall(`${baseUrl}/get_slugs_data_views_data`).toPromise().then(res => {
+        this.httpService.getHttpCall(`${baseUrl}/get_slugs_data_views_data`).toPromise().then(res => {
             this._pages = res.pages;
             this.notifyPagesChange();
 
@@ -225,7 +225,7 @@ export class AddonService {
         // Delete the dataview
         if (dataView) {
             dataView.Hidden = true;
-            await this.httpService.postPapiApiCall('/meta_data/data_views', dataView).toPromise().then(res => {
+            return this.httpService.postPapiApiCall('/meta_data/data_views', dataView).toPromise().then(res => {
                 this._dataViewsMap.delete(dataView.InternalID.toString());
                 this.notifySlugsDataViewsMapChange();
             }).catch(err => {
@@ -235,7 +235,7 @@ export class AddonService {
     }
 
     async saveSlugsDataView(dataView: MenuDataView) {
-        await this.upsertSlugDataView(dataView).then(dataView => {
+        return this.upsertSlugDataView(dataView).then(dataView => {
             this.upsertDataViewToMap(dataView);
             this.notifySlugsDataViewsMapChange();
         }).catch(err => {
