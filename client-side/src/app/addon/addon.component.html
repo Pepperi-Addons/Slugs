@@ -11,8 +11,8 @@
                 <pep-generic-list title="{{'SLUGS' | translate}}" [selectionType]="'multi'"  [uuidMapping]="'Key'" [showTopBar]='true'
                     [inline]="true" [actions]="actions" [pager]="pager" [dataSource]="dataSource" (fieldClick)="onCustomizeFieldClick($event)"
                     [noDataFoundMsg]="'NO_DATA' | translate">
-                    <div right-buttons>
-                        <pep-button [value]="'ACTIONS.CREATE_SLUG' | translate" [styleType]="'strong'" sizeType="sm"  (buttonClick)="openSlugDLG($event);" class="pep-spacing-element pull-left flip"></pep-button>
+                    <div right-buttons class="pep-spacing-element">
+                        <pep-button [value]="'ACTIONS.CREATE_SLUG' | translate" [styleType]="'strong'" sizeType="sm"  (buttonClick)="openSlugDLG($event);"></pep-button>
                     </div>
                 </pep-generic-list>
             </mat-tab>
