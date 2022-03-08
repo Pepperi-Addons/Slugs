@@ -12,7 +12,7 @@ import { PepSelectionData } from "@pepperi-addons/ngx-lib/list";
 import { IPepOption } from '@pepperi-addons/ngx-lib';
 import { GridDataViewField, MenuDataView, Page, Profile } from "@pepperi-addons/papi-sdk";
 import { IPepProfileDataViewsCard, IPepProfile, IPepProfileDataViewClickEvent, IPepProfileDataView } from '@pepperi-addons/ngx-lib/profile-data-views-list';
-import { Slug } from "./addon.model";
+import { ISlugData } from "./addon.model";
 import { MatTabChangeEvent } from "@angular/material/tabs";
 
 @Component({
@@ -26,8 +26,10 @@ export class AddonComponent implements OnInit {
 
     // Slugs tab variables
     dataSource: IPepGenericListDataSource = null;
-    slugsList: Array<any>;
-    slugsNumLimit = 50 + this.addonService.systemSlugs.length;
+    slugsList: Array<ISlugData> = [];
+    systemSlugsList: Array<ISlugData> = [];
+    // slugsNumLimit = 50 + this.addonService.systemSlugs.length;
+    slugsNumLimit: number;
     screenSize: PepScreenSizeType;
     slugSelectionData: PepSelectionData;
     public pager: IPepGenericListPager;
@@ -165,7 +167,10 @@ export class AddonComponent implements OnInit {
         return {
             init: async (state) => {
                 this.slugsList = await this.addonService.getSlugs();
-                
+                this.systemSlugsList = this.slugsList.filter(slug => slug.System);
+                // Init the slugs limit
+                this.slugsNumLimit = 50 + this.systemSlugsList.length;
+
                 if (state.searchString != "") {
                   //res = res.filter(collection => collection.Name.toLowerCase().includes(state.searchString.toLowerCase()))
                 }
@@ -225,7 +230,7 @@ export class AddonComponent implements OnInit {
         }
     }
 
-    openSlugDLG(slug: Slug = null){
+    openSlugDLG(slug: ISlugData = null){
        
         // check limitation of num of slugs when add new one
         if(!slug.hasOwnProperty('Key') && this.slugsList.length >= this.slugsNumLimit){
@@ -273,17 +278,25 @@ export class AddonComponent implements OnInit {
     }
 
     onCustomizeFieldClick(fieldClickEvent: IPepFormFieldClickEvent){
+        // TODO: Avner please Remove comment
+        // let isSysSlug = this.addonService.systemSlugs.filter(slug => {
+        //     return slug.Key === fieldClickEvent.id 
+        // }).length > 0 ? true : false;
+    //     if(isSysSlug){
+    //         this.showSystemSlugMSG('edit');
+    //    }
+    //    else{
+    //       this.editSlug(fieldClickEvent.id, false);  
+    //    }
 
-        let isSysSlug = this.addonService.systemSlugs.filter(slug => {
-            return slug.Key === fieldClickEvent.id 
-        }).length > 0 ? true : false;
+        const slug = this.slugsList.find(slug => slug.Key === fieldClickEvent.id);
 
-      if(isSysSlug){
-           this.showSystemSlugMSG('edit');
-      }
-      else{
-         this.editSlug(fieldClickEvent.id, false);  
-      }
+        if(slug.System) {
+            this.showSystemSlugMSG('edit');
+        }
+        else {
+            this.editSlug(fieldClickEvent.id, false);  
+        }
     }
     
     getAllSlugsUUID(){
@@ -298,12 +311,12 @@ export class AddonComponent implements OnInit {
 
         if(!needToValidate || this.checkIfSlugsCanBeAmended('edit')){
             let dr: ObjectsDataRow = this.genericListService.getItemById(key);
-            let slug = new Slug();
-            
-                slug.Name = dr.Fields[0].FormattedValue;
-                slug.Description = dr.Fields[1].FormattedValue;
-                slug.Slug = dr.Fields[2].FormattedValue;
-                slug.Key = dr.UID;
+            let slug: ISlugData = {
+                Name: dr.Fields[0].FormattedValue,
+                Description: dr.Fields[1].FormattedValue,
+                Slug: dr.Fields[2].FormattedValue,
+                Key: dr.UID,
+            }
 
             this.openSlugDLG(slug);
         }
@@ -331,7 +344,7 @@ export class AddonComponent implements OnInit {
     }
 
     deleteSlugs(){
-        this.addonService.upsertSlug(null, true, this.slugSelectionData, (res) => {
+        this.addonService.upsertSlug(null, true, this.slugSelectionData).then((res) => {
             this.dataSource = this.setDataSource();
         });
     }
@@ -339,20 +352,28 @@ export class AddonComponent implements OnInit {
     checkIfSlugsCanBeAmended(oper: string, key: string = null){
         let ret = true;
 
-        
         const deleteType = this.slugSelectionData.selectionType === 1 && this.slugSelectionData.rows.length > 0 ? 'include' :
                            this.slugSelectionData.selectionType === 0 && this.slugSelectionData.rows.length === 0 ? 'all' : 'exclude';
 
-        if( deleteType === 'all'){
+        if (deleteType === 'all') {
             ret = false;
         }
-        else{
-            this.addonService.systemSlugs.forEach( sysSlug  => {
+        else {
+            // TODO: Avner please Remove comment
+            // this.addonService.systemSlugs.forEach( sysSlug  => {
                 
-                if(deleteType === 'include' && this.slugSelectionData.rows.includes(sysSlug.Key)){
+            //     if(deleteType === 'include' && this.slugSelectionData.rows.includes(sysSlug.Key)){
+            //         ret = false;
+            //     }
+            //     else if(deleteType === 'exclude' && !this.slugSelectionData.rows.includes(sysSlug.Key)){
+            //         ret = false;
+            //     }
+                
+            // });
+            this.systemSlugsList.forEach(sysSlug => {
+                if (deleteType === 'include' && this.slugSelectionData.rows.includes(sysSlug.Key)) {
                     ret = false;
-                }
-                else if(deleteType === 'exclude' && !this.slugSelectionData.rows.includes(sysSlug.Key)){
+                } else if (deleteType === 'exclude' && !this.slugSelectionData.rows.includes(sysSlug.Key)) {
                     ret = false;
                 }
                 

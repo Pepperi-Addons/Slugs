@@ -5,6 +5,15 @@ import { resolve } from 'dns';
 
 const TABLE_NAME = 'Slugs';
 
+export interface ISlugData {
+    Key: string;
+    Name: string;
+    Description: string;
+    Slug: string;
+    Hidden?: boolean;
+    System?: boolean;
+}
+
 export class SlugsService {
 
     options : FindOptions | undefined;
@@ -23,31 +32,25 @@ export class SlugsService {
         this.addonUUID = client.AddonUUID;
     }
     
-    getSystemSlugs(){
-        return  [{ Name: 'Homepage', Description: 'Default home page', Key: '98765-0' , Slug: 'homepage' },
-                { Name: 'Accounts', Description: 'Default accounts page', Key: '98765-1' , Slug: 'accounts' },
-                { Name: 'Activities', Description: 'Default activities page', Key: '98765-2' , Slug: 'activities' },
-                { Name: 'Users', Description: 'Default users page', Key: '98765-3' , Slug: 'users' },
-                { Name: 'Contacts', Description: 'Default contacts page', Key: '98765-4' , Slug: 'contacts' },
-                { Name: 'Transactions', Description: 'Default transactions page', Key: '98765-5' , Slug: 'transactions' },
-                { Name: 'Details', Description: 'Default details page', Key: '98765-6' , Slug: 'details' },
-                { Name: 'List', Description: 'Default list page', Key: '98765-7' , Slug: 'list' },
-                { Name: 'Catalogs', Description: 'Default catalogs page', Key: '98765-8' , Slug: 'catalogs' },
-                { Name: 'Complete action', Description: 'Default complete action page', Key: '98765-9' , Slug: 'complete_action' },
-                { Name: 'Account details', Description: 'Default account details page', Key: '98765-10' , Slug: 'account_details' }];
+    getSystemSlugs(): ISlugData[] {
+        return  [{ Name: 'Homepage', Description: 'Default home page', Key: '98765-0' , Slug: 'homepage', System: true },
+                { Name: 'Accounts', Description: 'Default accounts page', Key: '98765-1' , Slug: 'accounts', System: true },
+                { Name: 'Activities', Description: 'Default activities page', Key: '98765-2' , Slug: 'activities', System: true },
+                { Name: 'Users', Description: 'Default users page', Key: '98765-3' , Slug: 'users', System: true },
+                { Name: 'Contacts', Description: 'Default contacts page', Key: '98765-4' , Slug: 'contacts', System: true },
+                { Name: 'Transactions', Description: 'Default transactions page', Key: '98765-5' , Slug: 'transactions', System: true },
+                { Name: 'Details', Description: 'Default details page', Key: '98765-6' , Slug: 'details', System: true },
+                { Name: 'List', Description: 'Default list page', Key: '98765-7' , Slug: 'list', System: true },
+                { Name: 'Catalogs', Description: 'Default catalogs page', Key: '98765-8' , Slug: 'catalogs', System: true },
+                { Name: 'Complete action', Description: 'Default complete action page', Key: '98765-9' , Slug: 'complete_action', System: true },
+                { Name: 'Account details', Description: 'Default account details page', Key: '98765-10' , Slug: 'account_details', System: true}];
     }
 
     async getSlugs(options: FindOptions | undefined = undefined) {
-        let slugList = await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).find(options);
-
-        //add default homepage slug to the list 
-        this.getSystemSlugs().forEach((sysSlug: any)  => {
-            slugList.unshift(sysSlug);
-        });
-
-        return slugList;
+        let slugList = await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).find(options) as ISlugData[];
+        const newArray = this.getSystemSlugs().concat(slugList);
+        return newArray;
     }
-
 
     async upsertSlug(body) {
         if(body.isDelete) {
@@ -130,13 +133,13 @@ export class SlugsService {
         return this.papiClient.get(encodeURI(addonURL)); 
     }
 
-    getBody(slug) {
-        return  {
+    getBody(slug): ISlugData {
+        return {
+            Key: slug.Key || null,
             Name: slug.Name,
             Description: slug.Description,
             Slug: slug.Slug || '',
             Hidden: slug.Hidden || false,
-            Key: slug.Key || null
         };
     }
 

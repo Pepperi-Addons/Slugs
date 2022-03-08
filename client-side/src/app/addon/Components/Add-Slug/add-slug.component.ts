@@ -2,7 +2,7 @@ import { Component, OnInit, Injectable, Input, Output, EventEmitter, Optional, I
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { AddonService } from 'src/app/services/addon.service';
-import { Slug } from '../../addon.model';
+import { ISlugData } from '../../addon.model';
 
 @Component({
     selector: 'add-slug',
@@ -13,7 +13,7 @@ import { Slug } from '../../addon.model';
 @Injectable()
 export class AddSlugComponent implements OnInit {
     
-    @Input() slug: Slug = new Slug();
+    @Input() slug: ISlugData;
     @Input() pageTypes: Array<string> = [];
 
     public isModified: boolean = false;
@@ -26,12 +26,21 @@ export class AddSlugComponent implements OnInit {
         
     }
 
+    getEmptySlug(): ISlugData {
+        return {
+            Key: '',
+            Name: '',
+            Description: '',
+            Slug: ''
+        }
+    }
+
     ngOnInit(): void {
         
         this.isModified = this.data?.slug?.Key ? true : false;
         this.dlgHeader = this.isModified ? this.translate.instant("ADD_SLUG.EDIT_SLUG") : this.translate.instant("ADD_SLUG.CREATE_NEW_TITLE");
         
-        this.slug = this.data?.slug || new Slug();
+        this.slug = this.data?.slug || { };
     }
 
     close(event){
@@ -59,14 +68,13 @@ export class AddSlugComponent implements OnInit {
 
     createSlug(event){
         if(this.checkSlugValidation(this.data.slug.Slug)){
-            this.addonService.upsertSlug(this.data.slug, false, null, (res) => {
+            this.addonService.upsertSlug(this.data.slug, false).then((res) => {
                 if(res.success){
                     this.dialogRef?.close(true);
                 }
                 else{
                     this.validateMsg = res.message;
                 }
-            
             });
         }
     }

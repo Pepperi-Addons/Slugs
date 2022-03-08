@@ -8,7 +8,7 @@ import { CdkDragDrop, CdkDragEnd, CdkDragStart, copyArrayItem, moveItemInArray }
 import { IPepOption, PepLoaderService } from '@pepperi-addons/ngx-lib';
 import { IPepButtonClickEvent } from '@pepperi-addons/ngx-lib/button';
 import { MenuDataView, MenuDataViewField, Page } from '@pepperi-addons/papi-sdk';
-import { IMappedSlug, Slug } from '../addon.model';
+import { IMappedSlug, ISlugData } from '../addon.model';
 
 @Component({
     templateUrl: './manage-slugs.component.html',
@@ -72,9 +72,9 @@ export class ManageSlugs implements OnInit {
         this.mappedSlugs = [];
         const dataViewId = this.activatedRoute.snapshot.params["dataview_id"];
 
-        await this.addonService.getSlugs().then((slugs: Slug[]) => {
+        await this.addonService.getSlugs().then((slugs: ISlugData[]) => {
             // TODO: Product ask to add this, when needed remove it.
-            slugs = slugs.filter(slug => { this.addonService.systemSlugs.findIndex(systemSlug => systemSlug.Slug === slug.Slug) === -1});
+            slugs = slugs.filter(slug => !slug.System);
 
             this.availableSlugs = slugs.map(slug => {
                 return { title: slug.Slug, data: slug.Slug }

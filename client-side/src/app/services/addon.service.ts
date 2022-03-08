@@ -7,7 +7,7 @@ import { PepHttpService, PepSessionService, PepUtilitiesService } from '@pepperi
 import { config } from 'addon.config';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { PepSelectionData } from '@pepperi-addons/ngx-lib/list';
-import { Slug } from '../addon/addon.model';
+import { ISlugData } from '../addon/addon.model';
 import { IPepProfile } from '@pepperi-addons/ngx-lib/profile-data-views-list';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -22,21 +22,21 @@ export class AddonService {
 
     private readonly SLUGS_DATAVIEW_NAME = 'Slugs';
     
-    private _systemSlugs: Slug[] = [{ Name: 'Homepage', Description: 'Default home page', Key: '98765-0' , Slug: 'homepage' },
-                            { Name: 'Accounts', Description: 'Default accounts page', Key: '98765-1' , Slug: 'accounts' },
-                            { Name: 'Activities', Description: 'Default activities page', Key: '98765-2' , Slug: 'activities' },
-                            { Name: 'Users', Description: 'Default users page', Key: '98765-3' , Slug: 'users' },
-                            { Name: 'Contacts', Description: 'Default contacts page', Key: '98765-4' , Slug: 'contacts' },
-                            { Name: 'Transactions', Description: 'Default transactions page', Key: '98765-5' , Slug: 'transactions' },
-                            { Name: 'Details', Description: 'Default details page', Key: '98765-6' , Slug: 'details' },
-                            { Name: 'List', Description: 'Default list page', Key: '98765-7' , Slug: 'list' },
-                            { Name: 'Catalogs', Description: 'Default catalogs page', Key: '98765-8' , Slug: 'catalogs' },
-                            { Name: 'Complete action', Description: 'Default complete action page', Key: '98765-9' , Slug: 'complete_action' },
-                            { Name: 'Account details', Description: 'Default account details page', Key: '98765-10' , Slug: 'account_details' }];
+    // private _systemSlugs: ISlugData[] = [{ Name: 'Homepage', Description: 'Default home page', Key: '98765-0' , Slug: 'homepage' },
+    //                         { Name: 'Accounts', Description: 'Default accounts page', Key: '98765-1' , Slug: 'accounts' },
+    //                         { Name: 'Activities', Description: 'Default activities page', Key: '98765-2' , Slug: 'activities' },
+    //                         { Name: 'Users', Description: 'Default users page', Key: '98765-3' , Slug: 'users' },
+    //                         { Name: 'Contacts', Description: 'Default contacts page', Key: '98765-4' , Slug: 'contacts' },
+    //                         { Name: 'Transactions', Description: 'Default transactions page', Key: '98765-5' , Slug: 'transactions' },
+    //                         { Name: 'Details', Description: 'Default details page', Key: '98765-6' , Slug: 'details' },
+    //                         { Name: 'List', Description: 'Default list page', Key: '98765-7' , Slug: 'list' },
+    //                         { Name: 'Catalogs', Description: 'Default catalogs page', Key: '98765-8' , Slug: 'catalogs' },
+    //                         { Name: 'Complete action', Description: 'Default complete action page', Key: '98765-9' , Slug: 'complete_action' },
+    //                         { Name: 'Account details', Description: 'Default account details page', Key: '98765-10' , Slug: 'account_details' }];
 
-    get systemSlugs(): Slug[] {
-        return this._systemSlugs.reverse().slice();
-    }
+    // get systemSlugs(): ISlugData[] {
+    //     return this._systemSlugs.reverse().slice();
+    // }
 
     addonURL = '';
     accessToken = '';
@@ -159,22 +159,24 @@ export class AddonService {
     }
 
     async getSlugs(query?: string) {
-        // query = '?where=Slug="avner666"';
-        if (query) { 
-            this.addonURL = this.addonURL + query;
-        }
-
-        const userSlugs = await this.papiClient.get(encodeURI(this.addonURL));
-
-        //add default homepage slug to the list 
-        this.systemSlugs.forEach((sysSlug: Slug)  => {
-            let slug = new Slug(sysSlug.Name, sysSlug.Description, sysSlug.Slug, sysSlug.Key, false);
-            userSlugs.unshift(slug);
-
-            return userSlugs;
-        });
+        const baseUrl = this.getBaseUrl(this.addonUUID);
+        return this.httpService.getHttpCall(`${baseUrl}/slugs?${query || ''}`).toPromise();
         
-        return Promise.resolve(userSlugs);
+        // TODO: Avner please Remove comment
+        // query = '?where=Slug="avner666"';
+        // if (query) { 
+        //     this.addonURL = this.addonURL + query;
+        // }
+        // const userSlugs = await this.papiClient.get(encodeURI(this.addonURL));
+        // //add default homepage slug to the list 
+        // this.systemSlugs.forEach((sysSlug: Slug)  => {
+        //     let slug = new Slug(sysSlug.Name, sysSlug.Description, sysSlug.Slug, sysSlug.Key, false);
+        //     userSlugs.unshift(slug);
+
+        //     return userSlugs;
+        // });
+        
+        // return Promise.resolve(userSlugs);
     }
 
     loadSlugsDataViewsData() {
@@ -254,28 +256,32 @@ export class AddonService {
     //     return this.httpService.getPapiApiCall(`/meta_data/data_views?where=Context.Name=${this.SLUGS_DATAVIEW_NAME}`).toPromise();
     // }
 
-    async upsertSlug(slug: Slug, isDelete: boolean = false, selectedObj: PepSelectionData = null, callback = null){
+    async upsertSlug(slug: ISlugData, isDelete: boolean = false, selectedObj: PepSelectionData = null) {
 
-        return new Promise(async (resolve, reject) => {
-
-            let body = {
-                slug: slug,
-                isDelete: isDelete,
-                selectedObj: selectedObj
-            };
+        let body = {
+            slug: slug,
+            isDelete: isDelete,
+            selectedObj: selectedObj
+        };
         
-            // work on prod
-            await this.httpService.postPapiApiCall(`/addons/api/${this.addonUUID}/api/slugs`, body).subscribe((res) => {
-            //await this.pepHttp.postHttpCall(`/addons/data/${this.addonUUID}/slugs`, body).subscribe((res) => {
-            // work on locallhost
-            //await this.pepHttp.postHttpCall('http://localhost:4500/api/slugs', body).subscribe((res) => {
+        const baseUrl = this.getBaseUrl(this.addonUUID);
+        return this.httpService.postHttpCall(`${baseUrl}/slugs`, body).toPromise();
 
-                if(callback){
-                    callback(res);
-                }
-            });       
+        // TODO: Avner please Remove comment
+        // return new Promise(async (resolve, reject) => {
+
+        //     // work on prod
+        //     await this.httpService.postPapiApiCall(`/addons/api/${this.addonUUID}/api/slugs`, body).subscribe((res) => {
+        //     //await this.pepHttp.postHttpCall(`/addons/data/${this.addonUUID}/slugs`, body).subscribe((res) => {
+        //     // work on locallhost
+        //     //await this.pepHttp.postHttpCall('http://localhost:4500/api/slugs', body).subscribe((res) => {
+
+        //         if(callback){
+        //             callback(res);
+        //         }
+        //     });       
                   
-        });
+        // });
     }
 
     async get(endpoint: string): Promise<any> {
