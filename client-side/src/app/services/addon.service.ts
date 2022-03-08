@@ -22,17 +22,17 @@ export class AddonService {
 
     private readonly SLUGS_DATAVIEW_NAME = 'Slugs';
     
-    private _systemSlugs = [{ Name: 'Homepage', Description: 'Default home page', Key: '98765-0' , Slug: '/homepage' },
-                            { Name: 'Accounts', Description: 'Default accounts page', Key: '98765-1' , Slug: '/accounts' },
-                            { Name: 'Activities', Description: 'Default activities page', Key: '98765-2' , Slug: '/activities' },
-                            { Name: 'Users', Description: 'Default users page', Key: '98765-3' , Slug: '/users' },
-                            { Name: 'Contacts', Description: 'Default contacts page', Key: '98765-4' , Slug: '/contacts' },
-                            { Name: 'Transactions', Description: 'Default transactions page', Key: '98765-5' , Slug: '/transactions' },
-                            { Name: 'Details', Description: 'Default details page', Key: '98765-6' , Slug: '/details' },
-                            { Name: 'List', Description: 'Default list page', Key: '98765-7' , Slug: '/list' },
-                            { Name: 'Catalogs', Description: 'Default catalogs page', Key: '98765-8' , Slug: '/catalogs' },
-                            { Name: 'Complete action', Description: 'Default complete action page', Key: '98765-9' , Slug: '/complete_action' },
-                            { Name: 'Account details', Description: 'Default account details page', Key: '98765-10' , Slug: '/account_details' }
+    private _systemSlugs = [{ Name: 'Homepage', Description: 'Default home page', Key: '98765-0' , Slug: 'homepage' },
+                            { Name: 'Accounts', Description: 'Default accounts page', Key: '98765-1' , Slug: 'accounts' },
+                            { Name: 'Activities', Description: 'Default activities page', Key: '98765-2' , Slug: 'activities' },
+                            { Name: 'Users', Description: 'Default users page', Key: '98765-3' , Slug: 'users' },
+                            { Name: 'Contacts', Description: 'Default contacts page', Key: '98765-4' , Slug: 'contacts' },
+                            { Name: 'Transactions', Description: 'Default transactions page', Key: '98765-5' , Slug: 'transactions' },
+                            { Name: 'Details', Description: 'Default details page', Key: '98765-6' , Slug: 'details' },
+                            { Name: 'List', Description: 'Default list page', Key: '98765-7' , Slug: 'list' },
+                            { Name: 'Catalogs', Description: 'Default catalogs page', Key: '98765-8' , Slug: 'catalogs' },
+                            { Name: 'Complete action', Description: 'Default complete action page', Key: '98765-9' , Slug: 'complete_action' },
+                            { Name: 'Account details', Description: 'Default account details page', Key: '98765-10' , Slug: 'account_details' }
 
     ];
 
@@ -267,11 +267,14 @@ export class AddonService {
             };
         
             // work on prod
-            await this.httpService.postPapiApiCall(`/addons/api/${this.addonUUID}/api/slugs`, body).subscribe((res) => {
-            //await this.pepHttp.postHttpCall(`/addons/data/${this.addonUUID}/slugs`, body).subscribe((res) => {
+            const baseUrl = this.getBaseUrl(this.addonUUID);
+            await this.httpService.postHttpCall(`${baseUrl}/slugs`, body).subscribe((res) => {
+            //await this.httpService.postPapiApiCall(`/addons/api/${this.addonUUID}/api/slugs`, body).subscribe((res) => {
+            //await this.httpService.postHttpCall(`/addons/data/${this.addonUUID}/slugs`, body).subscribe((res) => {
             // work on locallhost
-            //await this.pepHttp.postHttpCall('http://localhost:4500/api/slugs', body).subscribe((res) => {
-
+            //await  this.pepHttp.postHttpCall('http://localhost:4500/api/slugs', body).subscribe((res) => {
+            
+            //this.httpService.postHttpCall((`${baseUrl}/api/slugs`).toPromise().then(res => {
                 if(callback){
                     callback(res);
                 }

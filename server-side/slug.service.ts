@@ -59,9 +59,6 @@ export class SlugsService {
         else {
             const slugToUpsert = this.getBody(body.slug);
 
-            if(slugToUpsert.Key.indexOf('98765-') == 0){
-                throw new Error(`System slug ${slugToUpsert.Slug} can't be deleted`);
-            }
             if(slugToUpsert.Name === '' || slugToUpsert.Slug === ''){
                 throw new Error(`Name & Slug fields can't be empty.`);  
             }

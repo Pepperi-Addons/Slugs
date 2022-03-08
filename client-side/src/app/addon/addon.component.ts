@@ -27,7 +27,7 @@ export class AddonComponent implements OnInit {
     // Slugs tab variables
     dataSource: IPepGenericListDataSource = null;
     slugsList: Array<any>;
-    slugsNumLimit = 50;
+    slugsNumLimit = 50 + this.addonService.systemSlugs.length;
     screenSize: PepScreenSizeType;
     slugSelectionData: PepSelectionData;
     public pager: IPepGenericListPager;
