@@ -73,6 +73,9 @@ export class ManageSlugs implements OnInit {
         const dataViewId = this.activatedRoute.snapshot.params["dataview_id"];
 
         await this.addonService.getSlugs().then((slugs: Slug[]) => {
+            // TODO: Product ask to add this, when needed remove it.
+            slugs = slugs.filter(slug => { this.addonService.systemSlugs.findIndex(systemSlug => systemSlug.Slug === slug.Slug) === -1});
+
             this.availableSlugs = slugs.map(slug => {
                 return { title: slug.Slug, data: slug.Slug }
             }).sort((slug1, slug2) => {

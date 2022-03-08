@@ -7,9 +7,9 @@ export class Slug {
     Name: string;
     Description: string;
     Slug: string;
-    Hidden: boolean;
-    ModificationDateTime: string;
-    CreationDateTime: string;
+    Hidden?: boolean;
+    ModificationDateTime?: string;
+    CreationDateTime?: string;
 
     constructor(name='', description='', slug='', key=null, hidden = false , modificationDateTime = new Date().toISOString(), creationDateTime = new Date().toISOString()){
         this.Key = key;
