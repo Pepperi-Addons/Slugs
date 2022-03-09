@@ -79,16 +79,14 @@ export class SlugsService {
 
             // Add new Slug 
             if(slugToUpsert.Key === null){
-                
-                const query = `Slug=${slugToUpsert.Slug}`;
-                // get list of slugs & filter by slug field
-                //const slugList = await this.getSlugs({where: query});
-                const tmpList = slugList.filter( (slug) => {
-                        return slug.Slug == slugToUpsert.Slug;
-                });
 
-                 // check if slug is allready exits
-                if(tmpList.length === 0){
+            // get list of slugs & filter by slug field
+            let tmpList = slugList.filter( (slug) => {
+                return slug.Slug == slugToUpsert.Slug;
+            });
+
+            // check if slug is allready exits
+            if(tmpList.length === 0){
                     
                 const numOfSystemSlugs = slugList.filter( (slug) => {
                                 return slug.System && slug.System == true;
@@ -109,15 +107,28 @@ export class SlugsService {
                         success: true,
                         body: await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).upsert(slugToUpsert)
                     }
-                }
-                else{
-                    return {
+            }
+            else{
+                return {
                         success: false,
                         message: `Slug ${slugToUpsert.Slug} already exists`
-                    }
                 }
             }
+            }
             else {
+
+                // get list of slugs filter by key field
+                let tmpList = slugList.filter( (slug) => {
+                    return slug.Key == slugToUpsert.Key;
+                })[0];
+                
+                if(tmpList?.System != undefined && tmpList.System == true && tmpList.Slug !== slugToUpsert.Slug){
+                    return{ 
+                        success: false,
+                        message: 'Change of system slug Slug is not allowed'
+                    }
+                }
+                
                 // Update slug or Delete from API slug 
                 return {
                     success: true,
