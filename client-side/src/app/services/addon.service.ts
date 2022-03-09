@@ -145,22 +145,6 @@ export class AddonService {
     async getSlugs(query?: string) {
         const baseUrl = this.getBaseUrl(this.addonUUID);
         return this.httpService.getHttpCall(`${baseUrl}/slugs?${query || ''}`).toPromise();
-        
-        // TODO: Avner please Remove comment
-        // query = '?where=Slug="avner666"';
-        // if (query) { 
-        //     this.addonURL = this.addonURL + query;
-        // }
-        // const userSlugs = await this.papiClient.get(encodeURI(this.addonURL));
-        // //add default homepage slug to the list 
-        // this.systemSlugs.forEach((sysSlug: Slug)  => {
-        //     let slug = new Slug(sysSlug.Name, sysSlug.Description, sysSlug.Slug, sysSlug.Key, false);
-        //     userSlugs.unshift(slug);
-
-        //     return userSlugs;
-        // });
-        
-        // return Promise.resolve(userSlugs);
     }
 
     loadSlugsDataViewsData() {

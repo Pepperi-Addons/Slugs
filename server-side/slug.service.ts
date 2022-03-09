@@ -6,12 +6,12 @@ import { resolve } from 'dns';
 const TABLE_NAME = 'Slugs';
 
 export interface ISlugData {
-    Key: string;
+    Key?: string;
     Name: string;
     Description: string;
     Slug: string;
     Hidden?: boolean;
-    System?: boolean;
+    System?: boolean
 }
 
 export class SlugsService {
@@ -31,28 +31,9 @@ export class SlugsService {
 
         this.addonUUID = client.AddonUUID;
     }
-    
-    getSystemSlugs(): ISlugData[] {
-        return  [{ Name: 'Homepage', Description: 'Default home page', Key: '98765-0' , Slug: 'homepage', System: true },
-                { Name: 'Accounts', Description: 'Default accounts page', Key: '98765-1' , Slug: 'accounts', System: true },
-                { Name: 'Activities', Description: 'Default activities page', Key: '98765-2' , Slug: 'activities', System: true },
-                { Name: 'Users', Description: 'Default users page', Key: '98765-3' , Slug: 'users', System: true },
-                { Name: 'Contacts', Description: 'Default contacts page', Key: '98765-4' , Slug: 'contacts', System: true },
-                { Name: 'Transactions', Description: 'Default transactions page', Key: '98765-5' , Slug: 'transactions', System: true },
-                { Name: 'Details', Description: 'Default details page', Key: '98765-6' , Slug: 'details', System: true },
-                { Name: 'List', Description: 'Default list page', Key: '98765-7' , Slug: 'list', System: true },
-                { Name: 'Catalogs', Description: 'Default catalogs page', Key: '98765-8' , Slug: 'catalogs', System: true },
-                { Name: 'Cart', Description: 'Default cart page', Key: '98765-9' , Slug: 'cart', System: true },
-                { Name: 'Complete action', Description: 'Default complete action page', Key: '98765-10' , Slug: 'complete_action', System: true },
-                { Name: 'Account details', Description: 'Default account details page', Key: '98765-11' , Slug: 'account_details', System: true}];
-    }
 
     async getSlugs(options: FindOptions | undefined = undefined) {
-        let slugList = await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).find(options) as ISlugData[];
-        // let sysArray = this.getSystemSlugs().filter( (slug) => {
-        //     return options?.where ? slug.Slug == options.where.replace("Slug=","") : slug;
-        //   });
-        return this.getSystemSlugs().concat(slugList);
+        return await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).find(options) as ISlugData[];
     }
 
     async upsertSlug(body) {
@@ -109,7 +90,9 @@ export class SlugsService {
                  // check if slug is allready exits
                 if(tmpList.length === 0){
                     
-                    const numOfSystemSlugs = this.getSystemSlugs().length;
+                const numOfSystemSlugs = slugList.filter( (slug) => {
+                                return slug.System && slug.System == true;
+                        }).length;
 
                     // Limit the num of slugs to 50 (not included the system slugs)
                     if( slugList.length >= 50 + numOfSystemSlugs){
