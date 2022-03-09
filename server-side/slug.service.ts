@@ -42,21 +42,26 @@ export class SlugsService {
                 { Name: 'Details', Description: 'Default details page', Key: '98765-6' , Slug: 'details', System: true },
                 { Name: 'List', Description: 'Default list page', Key: '98765-7' , Slug: 'list', System: true },
                 { Name: 'Catalogs', Description: 'Default catalogs page', Key: '98765-8' , Slug: 'catalogs', System: true },
-                { Name: 'Complete action', Description: 'Default complete action page', Key: '98765-9' , Slug: 'complete_action', System: true },
-                { Name: 'Account details', Description: 'Default account details page', Key: '98765-10' , Slug: 'account_details', System: true}];
+                { Name: 'Cart', Description: 'Default cart page', Key: '98765-9' , Slug: 'cart', System: true },
+                { Name: 'Complete action', Description: 'Default complete action page', Key: '98765-10' , Slug: 'complete_action', System: true },
+                { Name: 'Account details', Description: 'Default account details page', Key: '98765-11' , Slug: 'account_details', System: true}];
     }
 
     async getSlugs(options: FindOptions | undefined = undefined) {
         let slugList = await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).find(options) as ISlugData[];
-        const newArray = this.getSystemSlugs().concat(slugList);
-        return newArray;
+        // let sysArray = this.getSystemSlugs().filter( (slug) => {
+        //     return options?.where ? slug.Slug == options.where.replace("Slug=","") : slug;
+        //   });
+        return this.getSystemSlugs().concat(slugList);
     }
 
     async upsertSlug(body) {
+
+        const slugList = await this.getSlugs({ where : 'Hidden=false'});
+
         if(body.isDelete) {
-            const query = `?where=Hidden=false`;
             // get list of slugs & filter by slug field
-            const slugList = await this.getSlugsList(query);
+            //const slugList = await this.getSlugs({ where : 'Hidden=false'});
             const deleteType = body.selectedObj.selectionType === 1 && body.selectedObj.rows.length > 0 ? 'include' :
                                body.selectedObj.selectionType === 0 && body.selectedObj.rows.length === 0 ? 'all' : 'exclude';
 
@@ -65,7 +70,7 @@ export class SlugsService {
                   (deleteType === 'include' && body.selectedObj.rows.includes(slugList[i].Key)) || 
                   (deleteType === 'exclude' && !body.selectedObj.rows.includes(slugList[i].Key))){
                     
-                    if(slugList[i].Key.indexOf('98765-') == -1){
+                    if(slugList[i].System == undefined || slugList[i].System == false){
                         let tmpBody = this.getBody(slugList[i]);
                         tmpBody.Hidden = true;
 
@@ -94,12 +99,15 @@ export class SlugsService {
             // Add new Slug 
             if(slugToUpsert.Key === null){
                 
-                const query = `?where=Slug=${slugToUpsert.Slug}&Hidden=false`;
+                const query = `Slug=${slugToUpsert.Slug}`;
                 // get list of slugs & filter by slug field
-                const slugList = await this.getSlugsList(query);
+                //const slugList = await this.getSlugs({where: query});
+                const tmpList = slugList.filter( (slug) => {
+                        return slug.Slug == slugToUpsert.Slug;
+                });
 
                  // check if slug is allready exits
-                if(slugList.length === 0){
+                if(tmpList.length === 0){
                     
                     // add Key if need ( for create new )
                     slugToUpsert.Key = uuid();

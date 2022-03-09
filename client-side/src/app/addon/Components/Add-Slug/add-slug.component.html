@@ -11,7 +11,7 @@
             </pep-select> -->
         </div>
     <div>
-            <pep-textbox [label]="'ADD_SLUG.SLUG' | translate" type="link" [(value)]="slug.Slug" sizeType="md" (valueChange)="checkSlugValidation($event)"></pep-textbox>
+            <pep-textbox [disabled]="slug?.System" [label]="'ADD_SLUG.SLUG' | translate" [(value)]="slug.Slug" sizeType="md" (valueChange)="checkSlugValidation($event)"></pep-textbox>
             <div [style.visibility]="validateMsg === '' ? 'hidden': 'visible'"  class="body-xs validationMsg">{{validateMsg}}</div>
             <div class="ulCont">
             <span class="body-xs">{{'ADD_SLUG.HOW_TO_SLUG' | translate}}</span>

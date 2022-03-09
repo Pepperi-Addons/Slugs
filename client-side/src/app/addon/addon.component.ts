@@ -278,25 +278,7 @@ export class AddonComponent implements OnInit {
     }
 
     onCustomizeFieldClick(fieldClickEvent: IPepFormFieldClickEvent){
-        // TODO: Avner please Remove comment
-        // let isSysSlug = this.addonService.systemSlugs.filter(slug => {
-        //     return slug.Key === fieldClickEvent.id 
-        // }).length > 0 ? true : false;
-    //     if(isSysSlug){
-    //         this.showSystemSlugMSG('edit');
-    //    }
-    //    else{
-    //       this.editSlug(fieldClickEvent.id, false);  
-    //    }
-
-        const slug = this.slugsList.find(slug => slug.Key === fieldClickEvent.id);
-
-        if(slug.System) {
-            this.showSystemSlugMSG('edit');
-        }
-        else {
             this.editSlug(fieldClickEvent.id, false);  
-        }
     }
     
     getAllSlugsUUID(){
@@ -308,18 +290,8 @@ export class AddonComponent implements OnInit {
     }
 
     editSlug(key: string = null, needToValidate: boolean = true){
-
-        if(!needToValidate || this.checkIfSlugsCanBeAmended('edit')){
-            let dr: ObjectsDataRow = this.genericListService.getItemById(key);
-            let slug: ISlugData = {
-                Name: dr.Fields[0].FormattedValue,
-                Description: dr.Fields[1].FormattedValue,
-                Slug: dr.Fields[2].FormattedValue,
-                Key: dr.UID,
-            }
-
+            const slug: ISlugData = this.slugsList.find(slug => slug.Key === key);
             this.openSlugDLG(slug);
-        }
     }
 
     showDeleteAssetMSG(callback?: any){
@@ -359,17 +331,6 @@ export class AddonComponent implements OnInit {
             ret = false;
         }
         else {
-            // TODO: Avner please Remove comment
-            // this.addonService.systemSlugs.forEach( sysSlug  => {
-                
-            //     if(deleteType === 'include' && this.slugSelectionData.rows.includes(sysSlug.Key)){
-            //         ret = false;
-            //     }
-            //     else if(deleteType === 'exclude' && !this.slugSelectionData.rows.includes(sysSlug.Key)){
-            //         ret = false;
-            //     }
-                
-            // });
             this.systemSlugsList.forEach(sysSlug => {
                 if (deleteType === 'include' && this.slugSelectionData.rows.includes(sysSlug.Key)) {
                     ret = false;
@@ -385,8 +346,7 @@ export class AddonComponent implements OnInit {
         }
         else{
             return ret;
-        }
-        
+        }   
     }
 
     showSystemSlugMSG(oper: string){

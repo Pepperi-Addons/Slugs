@@ -21,22 +21,6 @@ interface IPageProj {
 export class AddonService {
 
     private readonly SLUGS_DATAVIEW_NAME = 'Slugs';
-    
-    // private _systemSlugs: ISlugData[] = [{ Name: 'Homepage', Description: 'Default home page', Key: '98765-0' , Slug: 'homepage' },
-    //                         { Name: 'Accounts', Description: 'Default accounts page', Key: '98765-1' , Slug: 'accounts' },
-    //                         { Name: 'Activities', Description: 'Default activities page', Key: '98765-2' , Slug: 'activities' },
-    //                         { Name: 'Users', Description: 'Default users page', Key: '98765-3' , Slug: 'users' },
-    //                         { Name: 'Contacts', Description: 'Default contacts page', Key: '98765-4' , Slug: 'contacts' },
-    //                         { Name: 'Transactions', Description: 'Default transactions page', Key: '98765-5' , Slug: 'transactions' },
-    //                         { Name: 'Details', Description: 'Default details page', Key: '98765-6' , Slug: 'details' },
-    //                         { Name: 'List', Description: 'Default list page', Key: '98765-7' , Slug: 'list' },
-    //                         { Name: 'Catalogs', Description: 'Default catalogs page', Key: '98765-8' , Slug: 'catalogs' },
-    //                         { Name: 'Complete action', Description: 'Default complete action page', Key: '98765-9' , Slug: 'complete_action' },
-    //                         { Name: 'Account details', Description: 'Default account details page', Key: '98765-10' , Slug: 'account_details' }];
-
-    // get systemSlugs(): ISlugData[] {
-    //     return this._systemSlugs.reverse().slice();
-    // }
 
     addonURL = '';
     accessToken = '';
