@@ -109,6 +109,15 @@ export class SlugsService {
                  // check if slug is allready exits
                 if(tmpList.length === 0){
                     
+                    const numOfSystemSlugs = this.getSystemSlugs().length;
+
+                    // Limit the num of slugs to 50 (not included the system slugs)
+                    if( slugList.length >= 50 + numOfSystemSlugs){
+                        return {
+                            success: false,
+                            message: 'The number of slugs limit has been reached'
+                        }
+                    }
                     // add Key if need ( for create new )
                     slugToUpsert.Key = uuid();
                     
