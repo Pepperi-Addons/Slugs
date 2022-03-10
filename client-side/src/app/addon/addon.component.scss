@@ -17,3 +17,7 @@
     }
 }
 
+::ng-deep .pep-button.strong:focus{
+    box-shadow: none !important;
+}
+

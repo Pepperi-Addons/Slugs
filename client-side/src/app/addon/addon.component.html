@@ -12,7 +12,7 @@
                     [inline]="true" [actions]="actions" [pager]="pager" [dataSource]="dataSource" (fieldClick)="onCustomizeFieldClick($event)"
                     [noDataFoundMsg]="'NO_DATA' | translate">
                     <div right-buttons class="pep-spacing-element">
-                        <pep-button [value]="'ACTIONS.CREATE_SLUG' | translate" [styleType]="'strong'" sizeType="sm"  (buttonClick)="openSlugDLG($event);"></pep-button>
+                        <pep-button [value]="'ACTIONS.CREATE_SLUG' | translate" iconName="number_plus" [styleType]="'strong'" sizeType="sm"  (buttonClick)="openSlugDLG($event);"></pep-button> 
                     </div>
                 </pep-generic-list>
             </mat-tab>
@@ -21,7 +21,6 @@
                     [availableProfiles]="availableProfiles"
                     [defaultProfileId]="defaultProfileId" (dataViewEditClick)="onDataViewEditClicked($event)"
                     (dataViewDeleteClick)="onDataViewDeleteClicked($event)" (saveNewProfileClick)="onSaveNewProfileClicked($event)">
-
                 </pep-profile-data-views-list>
             </mat-tab>
         </mat-tab-group>
