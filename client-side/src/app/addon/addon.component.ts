@@ -169,7 +169,7 @@ export class AddonComponent implements OnInit {
                 this.slugsList = await this.addonService.getSlugs();
                 this.systemSlugsList = this.slugsList.filter(slug => slug.System);
                 // Init the slugs limit
-                this.slugsNumLimit = -10 + this.systemSlugsList.length;
+                this.slugsNumLimit = 50 + this.systemSlugsList.length;
 
                 if (state.searchString != "") {
                   //res = res.filter(collection => collection.Name.toLowerCase().includes(state.searchString.toLowerCase()))
