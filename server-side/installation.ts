@@ -9,10 +9,11 @@ The error Message is importent! it will be written in the audit log and help the
 import { v4 as uuid } from 'uuid';
 import { Client, Request } from '@pepperi-addons/debug-server'
 import { PapiClient } from '@pepperi-addons/papi-sdk';
-import { ISlugData } from './slug.service';
+import { ISlugData , SlugsService } from './slug.service';
 
 export async function install(client: Client, request: Request): Promise<any> {
 
+    const service = new SlugsService(client);
     const TABLE_NAME = 'Slugs';
     const systemSlugs: ISlugData[] = [{ Name: 'Homepage', Description: 'Default home page', Slug: 'homepage', System: true },
                 { Name: 'Accounts', Description: 'Default accounts page', Slug: 'accounts', System: true },
@@ -64,8 +65,9 @@ export async function install(client: Client, request: Request): Promise<any> {
             slug.Key = uuid();
             papiClient.addons.data.uuid(client.AddonUUID).table(TABLE_NAME).upsert(slug);
         });
-        
-       
+
+        await service.createSlugsRelation();
+           
     } catch (err) {
         throw new Error(`Failed to create ADAL Tables. error - ${err}`);
     }

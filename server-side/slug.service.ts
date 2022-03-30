@@ -1,4 +1,4 @@
-import { PapiClient, InstalledAddon, FindOptions, Page, MenuDataView } from '@pepperi-addons/papi-sdk'
+import { PapiClient, InstalledAddon, FindOptions, Page, MenuDataView, Relation } from '@pepperi-addons/papi-sdk'
 import { Client } from '@pepperi-addons/debug-server';
 import { v4 as uuid } from 'uuid';
 import { resolve } from 'dns';
@@ -152,6 +152,35 @@ export class SlugsService {
             Slug: slug.Slug || '',
             Hidden: slug.Hidden || false,
         };
+    }
+
+    async createSlugsRelation(){
+        
+        //check if relation exist 
+        let uiFieldBankRelation = await this.getRelations("UIFieldBank");
+
+        if(!uiFieldBankRelation || uiFieldBankRelation?.length === 0){            
+
+            //create new
+            const uiBankFieldsRelation: Relation = {
+                RelationName: "UIFieldBank",
+                Name:"SlugsDataView",
+                Description:"Get the slugs dataview",
+                Type: "AddonAPI",
+                SubType: "NG11",
+                AddonUUID: this.client.AddonUUID,
+                AddonRelativeURL: "/api/slugs_dataview",
+                AddtionalDataTableName: "Slug"        
+
+            };                
+            uiFieldBankRelation =  await this.papiClient.post('/addons/data/relations', uiBankFieldsRelation);
+        } 
+        
+        return uiFieldBankRelation;
+    }
+
+    getRelations(relationName: string): Promise<any> {
+        return this.papiClient.get(`/addons/data/relations?where=RelationName=${relationName}`);
     }
 
     async getSlugsDataViewsData() {
