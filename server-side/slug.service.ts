@@ -170,9 +170,7 @@ export class SlugsService {
                 SubType: "NG11",
                 AddonUUID: this.client.AddonUUID,
                 AddonRelativeURL: "/api/slugs_dataview",
-                AdditionalParams: {
-                    AddtionalDataTableName: "Slugs"
-                }             
+                AddtionalDataTableName: "Slug"        
 
             };                
             uiFieldBankRelation =  await this.papiClient.post('/addons/data/relations', uiBankFieldsRelation);
