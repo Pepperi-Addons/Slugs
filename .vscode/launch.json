@@ -44,7 +44,13 @@
             "protocol": "inspector",
             "port": 9222,
             "address": "localhost",
-            // "websocketAddress": "ws://0.0.0.0:9222/f56157ef-6f9b-49d8-ae3a-db4ccd53ffff",
+            // "preLaunchTask": {
+            //     "label": "Build cpi side & publish for debug",
+            //     "type": "npm",
+            //     "script": "publish-cpi-side-debug",
+            //     "group": "build",
+            //     "problemMatcher": []
+            // },  
             "name": "Launch CPINode debugger Server",
         }
     ]
