@@ -1,4 +1,4 @@
-import { PapiClient, InstalledAddon, FindOptions, Page, MenuDataView, Relation } from '@pepperi-addons/papi-sdk'
+import { PapiClient, InstalledAddon, FindOptions, Page, DataView, Relation } from '@pepperi-addons/papi-sdk'
 import { Client } from '@pepperi-addons/debug-server';
 import { v4 as uuid } from 'uuid';
 import { resolve } from 'dns';
@@ -37,7 +37,6 @@ export class SlugsService {
     }
 
     async upsertSlug(body) {
-
         const slugList = await this.getSlugs({ where : 'Hidden=false'});
 
         if(body.isDelete) {
@@ -144,7 +143,7 @@ export class SlugsService {
         return this.papiClient.get(encodeURI(addonURL)); 
     }
 
-    getBody(slug): ISlugData {
+    private getBody(slug): ISlugData {
         return {
             Key: slug.Key || null,
             Name: slug.Name,
@@ -154,14 +153,12 @@ export class SlugsService {
         };
     }
 
-    async createSlugsRelation(){
-        
-        //check if relation exist 
+    async createSlugsRelation() {
+        // Check if relation exist 
         let uiFieldBankRelation = await this.getRelations("UIFieldBank");
 
-        if(!uiFieldBankRelation || uiFieldBankRelation?.length === 0){            
-
-            //create new
+        if(!uiFieldBankRelation || uiFieldBankRelation?.length === 0) {            
+            // Create new
             const uiBankFieldsRelation: Relation = {
                 RelationName: "UIFieldBank",
                 Name:"SlugsDataView",
@@ -171,8 +168,8 @@ export class SlugsService {
                 AddonUUID: this.client.AddonUUID,
                 AddonRelativeURL: "/api/slugs_dataview",
                 AddtionalDataTableName: "Slug"        
+            };
 
-            };                
             uiFieldBankRelation =  await this.papiClient.post('/addons/data/relations', uiBankFieldsRelation);
         } 
         
@@ -183,6 +180,14 @@ export class SlugsService {
         return this.papiClient.get(`/addons/data/relations?where=RelationName=${relationName}`);
     }
 
+    private getSlugsDataViews(): Promise<DataView[]> {
+        const res = this.papiClient.metaData.dataViews.find({
+            where: `Context.Name='Slugs'`
+        });
+
+        return res;
+    }
+    
     async getSlugsDataViewsData() {
         const dataPromises: Promise<any>[] = [];
 
@@ -190,9 +195,7 @@ export class SlugsService {
         // const dataViews = await this.papiClient.metaData.dataViews.find({
         //     where: `Context.Name='Slugs'`
         // });
-        dataPromises.push(this.papiClient.metaData.dataViews.find({
-            where: `Context.Name='Slugs'`
-        }));
+        dataPromises.push(this.getSlugsDataViews());
 
         // Get the profiles
         // const profiles = await this.papiClient.profiles.find();
@@ -210,6 +213,27 @@ export class SlugsService {
             profiles: arr[1].map(profile => { return { id: profile.InternalID.toString(), name: profile.Name } }),
             pages: arr[2].map(page => { return { key: page.Key, name: page.Name } }), // Return projection of key & name
         }
+    }
+
+    async getMappedSlugs() {
+        const mappedSlugs: any[] = [];
+        const dataViews = await this.getSlugsDataViews();
+
+        if (dataViews?.length === 1) {
+            const dataView = dataViews[0];
+
+            if (dataView && dataView.Fields) {
+                for (let index = 0; index < dataView.Fields.length; index++) {
+                    const field = dataView.Fields[index];
+                    mappedSlugs.push({
+                        slug: field.FieldID,
+                        pageKey: field.Title
+                    });
+                }
+            }
+        }
+
+        return mappedSlugs;
     }
 }
 

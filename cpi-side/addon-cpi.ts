@@ -1,154 +1,7 @@
 import '@pepperi-addons/cpi-node'
 import { DataViewContext, PapiClient } from '@pepperi-addons/papi-sdk';
 
-export async function load(configuration: any) {
-    debugger;
-    pepperi.events.intercept('OnExecuteCommand', {}, async (data, next, main) => {
-        // TODO: Write code here
-        data.client?.alert('title test1', 'content test');
-        data.client?.alert('title test2', 'content test');
-        data.client?.alert('title test3', 'content test');
-        
-        await next(main);
-    });
-
-    console.log('cpi side works!');
-    // Put your cpi side code here
-}
-
 export const router = Router();
-
-// Get the page by Key
-// router.get("/slugs/:key", async (req, res) => {
-//     let page = {};
-    
-//     try {
-//         console.log("CPISide - GET slug with query params (slug key)");
-//         // pages = await pepperi.api.adal.getList({ 
-//         //     addon: '4ba5d6f9-6642-4817-af67-c79b68c96977',
-//         //     table: 'Slugs'
-//         // }).then(obj => obj.objects);
-        
-//         page = await pepperi.api.adal.get({ 
-//             addon: '4ba5d6f9-6642-4817-af67-c79b68c96977',
-//             table: 'Slugs',
-//             key: req.params.key
-//         }).then(obj => obj.object);
-
-//     } catch(exception) {
-//         // Handle exception.
-//     }
-
-//     res.json({ result: page });
-// });
-
-router.post('/get_page', async (req, res) => {
-    debugger
-    const url = req.body.slug;
-    validateSlug(url, res);
-    let slugPath = url.split('?')[0]; // before query params
-    // slug is the path 
-    const queryParams = queryParams2Object(url.split('?')[1])
-    // NOTE: path params are supported only for legacy pages   
-    const legacyPageIndex = getLegacyPageIndex(slugPath);
-
-    let resObj = {}
-    // If this slug is legacy.
-    if (legacyPageIndex >= 0) {
-        const pathParams = getPathParamsForLegacy(legacyPageIndex, slugPath);
-
-        resObj = {
-            success: true,
-            slug: slugPath,// /list/:listType/:id
-            isLegacy: true,
-            pathParams: pathParams,
-            pageParams: queryParams,
-        };
-    } else { 
-        const slugObj = await getUserDefinedSlug(slugPath)
-        
-        if (slugObj) {
-            resObj = {
-                success: true,
-                slug: slugObj.url,
-                isLegacy: false,
-                pageKey: slugObj.pageUUID,
-                pageParams: queryParams,
-            };
-        } else {
-            resObj = {
-                success: false,
-                message: 'Page not found'
-            };
-        }
-    }
-    
-    res.json(resObj);
-
-});
-
-function getPathParamsForLegacy(legacyPageIndex, slugPath) {
-    // TODO:
-    const legacyParams = legecyPages[legacyPageIndex].split('/:');
-
-    return {
-        listType: 'activities',
-        id: '123'
-    };
-}
-
-function validateSlug(slug: string, res) {
-    // slug should start with /
-    if (!slug.startsWith('/')) {
-        res.json({
-            success: false,
-            message: 'Invalid slug'
-        });
-        return false;
-    }
-    else {
-        return true;
-    }
-}
-async function getUserDefinedSlug(slug) {
-    slug = getFirstPathParam(slug);
-    const ctx = { Name: 'Slugs' } as DataViewContext;
-    const slugsUiObj = await pepperi.UIObject.Create(ctx);
-    const dataView = slugsUiObj?.dataView;
-    const fields = dataView?.Fields as any[];
-    const slugs = fields?.map(field => {
-        return {
-            url: field.FieldID,
-            pageUUID: field.Title
-        }
-    });
-
-    const slugObj = slugs?.find(x => x.url === slug);
-    return slugObj;
-}
-
-function getFirstPathParam(slug: string) {
-    let firstPathParams = "";
-    if (slug.startsWith('/')) {
-        firstPathParams = slug.split('/')[1];
-    }
-    else {
-        firstPathParams = slug.split('/')[0];
-    }
-    return firstPathParams;
-}
-
-function getLegacyPageIndex(slug) {
-    for (let index = 0; index < legecyPages.length; index++) {
-        const legacyPage = legecyPages[index];
-        
-        if (slug.includes(legacyPage)) {
-            return index;
-        }
-    }
-
-    return -1;
-}
 
 const legecyPages = [
     'homepage', 
@@ -179,6 +32,134 @@ const legecyPages = [
     // 'account_details'
 ];
 
+// Get the page by Key
+// router.get("/slugs/:key", async (req, res) => {
+//     let page = {};
+    
+//     try {
+//         console.log("CPISide - GET slug with query params (slug key)");
+//         // pages = await pepperi.api.adal.getList({ 
+//         //     addon: '4ba5d6f9-6642-4817-af67-c79b68c96977',
+//         //     table: 'Slugs'
+//         // }).then(obj => obj.objects);
+        
+//         page = await pepperi.api.adal.get({ 
+//             addon: '4ba5d6f9-6642-4817-af67-c79b68c96977',
+//             table: 'Slugs',
+//             key: req.params.key
+//         }).then(obj => obj.object);
+
+//     } catch(exception) {
+//         // Handle exception.
+//     }
+
+//     res.json({ result: page });
+// });
+
+router.post('/get_page', async (req, res) => {
+    debugger;
+    const url = req.body.slug;
+    validateSlug(url, res);
+    let slugPath = url.split('?')[0]; // before query params
+    // slug is the path 
+    const queryParams = queryParams2Object(url.split('?')[1])
+    // NOTE: path params are supported only for legacy pages   
+    const legacyPageIndex = getLegacyPageIndex(slugPath);
+
+    let resObj = {}
+    // If this slug is legacy.
+    if (legacyPageIndex >= 0) {
+        const pathParams = getPathParamsForLegacy(legacyPageIndex, slugPath);
+
+        resObj = {
+            success: true,
+            slug: slugPath,
+            isLegacy: true,
+            pathParams: pathParams,
+            pageParams: queryParams,
+        };
+    } else { 
+        const slugObj = await getUserDefinedSlug(slugPath)
+        
+        if (slugObj) {
+            resObj = {
+                success: true,
+                slug: slugObj.url,
+                isLegacy: false,
+                pageKey: slugObj.pageUUID,
+                pageParams: queryParams,
+            };
+        } else {
+            resObj = {
+                success: false,
+                message: 'Page not found'
+            };
+        }
+    }
+    
+    res.json(resObj);
+
+});
+
+function removeFirstCharIfNeeded(str) {
+    if (str.length > 0 && str.startsWith('/')) {
+        return str.substring(1);
+    } else {
+        return str;
+    }
+}
+
+function getPathParamsForLegacy(legacyPageIndex: number, slugPath: string) {
+    const res = {};
+    let legecyPagePath = removeFirstCharIfNeeded(legecyPages[legacyPageIndex]);
+    slugPath = removeFirstCharIfNeeded(slugPath);
+    
+    const legacyParams = legecyPagePath.split('/:');
+    const slugsPathParams = slugPath.split('/');
+
+    if (legacyParams.length === slugsPathParams.length) {
+        for (let index = 1; index < legacyParams.length; index++) {
+            const legacyParam = legacyParams[index];
+            const slugsPathParam = slugsPathParams[index];
+            
+            res[legacyParam] = slugsPathParam;
+        }
+    }
+
+    return res;
+}
+
+function validateSlug(slug: string, res) {
+    // slug should start with /
+    if (!slug.startsWith('/')) {
+        res.json({
+            success: false,
+            message: 'Invalid slug'
+        });
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+
+function getFirstPathParam(slug: string) {
+    slug = removeFirstCharIfNeeded(slug);
+    return slug.split('/')[0];
+}
+
+function getLegacyPageIndex(slug) {
+    for (let index = 0; index < legecyPages.length; index++) {
+        const legacyPage = legecyPages[index];
+        
+        if (slug.includes(legacyPage)) {
+            return index;
+        }
+    }
+
+    return -1;
+}
+
 function queryParams2Object(queryParams: string) {
     if (!queryParams) {
         return {};
@@ -193,21 +174,45 @@ function queryParams2Object(queryParams: string) {
     return result;
 }
 
-// Example get function from Dor
-// //setup routers for router automation tests
-// router.get("/addon-api/get", (req, res) => {
-//     console.log("AddonAPI test currently on CPISide - GET with query params");
-//     const queryString = req.query.q;
-//     if (
-//       queryString === "queryParam" &&
-//       queryString !== null &&
-//       queryString !== undefined
-//     ) {
-//       res.json({
-//         result: "success",
-//         params: queryString,
-//       });
-//     }
-//     res.json({ result: "failure" });
-// });
-// router.post("/slugs")
+async function getUserDefinedSlug(slug) {
+    const ctx = { Name: 'Slugs' } as DataViewContext;
+    const slugsUiObj = await pepperi.UIObject.Create(ctx);
+    const dataView = slugsUiObj?.dataView;
+    const fields = dataView?.Fields as any[];
+    const slugs = fields?.map(field => {
+        return {
+            url: field.FieldID,
+            pageUUID: field.Title
+        }
+    });
+
+    slug = getFirstPathParam(slug);
+    const slugObj = slugs?.find(x => x.url === slug);
+    return slugObj;
+}
+
+export async function load(configuration: any) {
+    pepperi.events.intercept('OnExecuteCommand', {}, async (data, next, main) => {
+        // Handle SLUG_ command
+        const SLUG_PREFIX = 'SLUG_';
+        const commandId = data['CommandId'] || '';
+        if (commandId.startsWith(SLUG_PREFIX)) {
+            const { DataObject, FieldID, UIObject, UIPage, client, CommandId, ...rest } = data;
+            const queryParams = '?' + Object.keys(rest).map(key => `${key}=${rest[key]}`).join('&');
+
+            data.client?.navigateTo({
+                url: commandId.substring(SLUG_PREFIX.length) + (queryParams.length > 1 ? queryParams : '')
+            });
+        }
+
+        // Test alert
+        // data.client?.alert('title test1', 'content test');
+        // data.client?.alert('title test2', 'content test');
+        // data.client?.alert('title test3', 'content test');
+        
+        await next(main);
+    });
+
+    console.log('cpi side works!');
+    // Put your cpi side code here
+}

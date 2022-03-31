@@ -34,4 +34,12 @@ export async function get_slugs_data_views_data(client: Client, request: Request
     }
 }
 
+export async function get_mapped_slugs(client: Client, request: Request): Promise<any> {
+    try {
+        const service = new SlugsService(client);
+        return service.getMappedSlugs();
+    } catch(err) {
+        throw new Error(`Failed to get mapped slugs. error - ${err}`);
+    }
+}
 

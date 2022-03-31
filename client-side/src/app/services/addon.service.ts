@@ -219,11 +219,6 @@ export class AddonService {
         }
     }
 
-    // getSlugsDataViews() {
-    //     // Get the dataviews with Context.Name='Slugs' (all slugs dataviews)
-    //     return this.httpService.getPapiApiCall(`/meta_data/data_views?where=Context.Name=${this.SLUGS_DATAVIEW_NAME}`).toPromise();
-    // }
-
     async upsertSlug(slug: ISlugData, isDelete: boolean = false, selectedObj: PepSelectionData = null) {
 
         let body = {
@@ -234,22 +229,6 @@ export class AddonService {
         
         const baseUrl = this.getBaseUrl(this.addonUUID);
         return this.httpService.postHttpCall(`${baseUrl}/slugs`, body).toPromise();
-
-        // TODO: Avner please Remove comment
-        // return new Promise(async (resolve, reject) => {
-
-        //     // work on prod
-        //     await this.httpService.postPapiApiCall(`/addons/api/${this.addonUUID}/api/slugs`, body).subscribe((res) => {
-        //     //await this.pepHttp.postHttpCall(`/addons/data/${this.addonUUID}/slugs`, body).subscribe((res) => {
-        //     // work on locallhost
-        //     //await this.pepHttp.postHttpCall('http://localhost:4500/api/slugs', body).subscribe((res) => {
-
-        //         if(callback){
-        //             callback(res);
-        //         }
-        //     });       
-                  
-        // });
     }
 
     async get(endpoint: string): Promise<any> {
