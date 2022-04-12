@@ -32,7 +32,7 @@ const legecyPages = [
     // 'account_details'
 ];
 
-// Get the page by Key
+// Get the slug by Key
 // router.get("/slugs/:key", async (req, res) => {
 //     let page = {};
     
@@ -99,6 +99,26 @@ router.post('/get_page', async (req, res) => {
     
     res.json(resObj);
 
+});
+
+router.get('/get_slugs_dataview', async (req, res) => {
+    let resObj = {}
+    
+    const slugDataView = await getSlugDataView();
+        
+    if (slugDataView) {
+        resObj = {
+            success: true,
+            slugDataView: slugDataView
+        };
+    } else {
+        resObj = {
+            success: false,
+            message: 'Slugs dataview not found'
+        };
+    }
+    
+    res.json(resObj);
 });
 
 function removeFirstCharIfNeeded(str) {
@@ -174,10 +194,14 @@ function queryParams2Object(queryParams: string) {
     return result;
 }
 
-async function getUserDefinedSlug(slug) {
+async function getSlugDataView() {
     const ctx = { Name: 'Slugs' } as DataViewContext;
     const slugsUiObj = await pepperi.UIObject.Create(ctx);
-    const dataView = slugsUiObj?.dataView;
+    return slugsUiObj?.dataView;
+}
+
+async function getUserDefinedSlug(slug) {
+    const dataView = await getSlugDataView();
     const fields = dataView?.Fields as any[];
     const slugs = fields?.map(field => {
         return {

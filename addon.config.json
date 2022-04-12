@@ -1,6 +1,6 @@
 {
   "AddonUUID": "4ba5d6f9-6642-4817-af67-c79b68c96977",
-  "AddonVersion": "0.0.31",
+  "AddonVersion": "0.0.34",
   "DebugPort": 4500,
   "WebappBaseUrl": "https://app.sandbox.pepperi.com",
   "DefaultEditor": "main",
@@ -20,7 +20,11 @@
         "Description": "A list of slugs that can be mapped to pages"
       }
     ],
-    "Dependencies": {},
+    "Dependencies": {
+      "webapp": "16.85.47",
+      "page_builder": "0.0.105",
+      "cpi_node": "0.4.4"
+    },
     "CPISide": [
       "addon-cpi.ts"
     ]
