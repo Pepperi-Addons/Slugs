@@ -219,13 +219,13 @@ export async function load(configuration: any) {
     pepperi.events.intercept('OnExecuteCommand', {}, async (data, next, main) => {
         // Handle SLUG_ command
         const SLUG_PREFIX = 'SLUG_';
-        const commandId = data['CommandId'] || '';
-        if (commandId.startsWith(SLUG_PREFIX)) {
-            const { DataObject, FieldID, UIObject, UIPage, client, CommandId, ...rest } = data;
+        const commandKey = data['CommandKey'] || '';
+        if (commandKey.startsWith(SLUG_PREFIX)) {
+            const { DataObject, FieldID, UIObject, UIPage, client, CommandKey, ...rest } = data;
             const queryParams = '?' + Object.keys(rest).map(key => `${key}=${rest[key]}`).join('&');
 
             data.client?.navigateTo({
-                url: commandId.substring(SLUG_PREFIX.length) + (queryParams.length > 1 ? queryParams : '')
+                url: commandKey.substring(SLUG_PREFIX.length) + (queryParams.length > 1 ? queryParams : '')
             });
         }
 
