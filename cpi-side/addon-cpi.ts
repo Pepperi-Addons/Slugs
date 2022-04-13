@@ -59,7 +59,7 @@ const legecyPages = [
 router.post('/get_page', async (req, res) => {
     debugger;
     const url = req.body.slug;
-    validateSlug(url, res);
+    // validateSlug(url, res);
     let slugPath = url.split('?')[0]; // before query params
     // slug is the path 
     const queryParams = queryParams2Object(url.split('?')[1])
