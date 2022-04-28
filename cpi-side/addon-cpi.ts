@@ -57,7 +57,7 @@ const legecyPages = [
 // });
 
 router.post('/get_page', async (req, res) => {
-    debugger;
+    // debugger;
     const url = req.body.slug;
     // validateSlug(url, res);
     let slugPath = url.split('?')[0]; // before query params
@@ -224,7 +224,7 @@ export async function load(configuration: any) {
             const { DataObject, FieldID, UIObject, UIPage, client, CommandKey, ...rest } = data;
             const queryParams = '?' + Object.keys(rest).map(key => `${key}=${rest[key]}`).join('&');
 
-            data.client?.navigateTo({
+            await data.client?.navigateTo({
                 url: commandKey.substring(SLUG_PREFIX.length) + (queryParams.length > 1 ? queryParams : '')
             });
         }
