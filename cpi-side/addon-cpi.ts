@@ -32,7 +32,7 @@ const legecyPages = [
     // 'account_details'
 ];
 
-// Get the page by Key
+// Get the slug by Key
 // router.get("/slugs/:key", async (req, res) => {
 //     let page = {};
     
@@ -57,9 +57,9 @@ const legecyPages = [
 // });
 
 router.post('/get_page', async (req, res) => {
-    debugger;
+    // debugger;
     const url = req.body.slug;
-    validateSlug(url, res);
+    // validateSlug(url, res);
     let slugPath = url.split('?')[0]; // before query params
     // slug is the path 
     const queryParams = queryParams2Object(url.split('?')[1])
@@ -99,6 +99,26 @@ router.post('/get_page', async (req, res) => {
     
     res.json(resObj);
 
+});
+
+router.get('/get_slugs_dataview', async (req, res) => {
+    let resObj = {}
+    
+    const slugDataView = await getSlugDataView();
+        
+    if (slugDataView) {
+        resObj = {
+            success: true,
+            slugDataView: slugDataView
+        };
+    } else {
+        resObj = {
+            success: false,
+            message: 'Slugs dataview not found'
+        };
+    }
+    
+    res.json(resObj);
 });
 
 function removeFirstCharIfNeeded(str) {
@@ -174,10 +194,14 @@ function queryParams2Object(queryParams: string) {
     return result;
 }
 
-async function getUserDefinedSlug(slug) {
+async function getSlugDataView() {
     const ctx = { Name: 'Slugs' } as DataViewContext;
     const slugsUiObj = await pepperi.UIObject.Create(ctx);
-    const dataView = slugsUiObj?.dataView;
+    return slugsUiObj?.dataView;
+}
+
+async function getUserDefinedSlug(slug) {
+    const dataView = await getSlugDataView();
     const fields = dataView?.Fields as any[];
     const slugs = fields?.map(field => {
         return {
@@ -195,13 +219,13 @@ export async function load(configuration: any) {
     pepperi.events.intercept('OnExecuteCommand', {}, async (data, next, main) => {
         // Handle SLUG_ command
         const SLUG_PREFIX = 'SLUG_';
-        const commandId = data['CommandId'] || '';
-        if (commandId.startsWith(SLUG_PREFIX)) {
-            const { DataObject, FieldID, UIObject, UIPage, client, CommandId, ...rest } = data;
+        const commandKey = data['CommandKey'] || '';
+        if (commandKey.startsWith(SLUG_PREFIX)) {
+            const { DataObject, FieldID, UIObject, UIPage, client, CommandKey, ...rest } = data;
             const queryParams = '?' + Object.keys(rest).map(key => `${key}=${rest[key]}`).join('&');
 
-            data.client?.navigateTo({
-                url: commandId.substring(SLUG_PREFIX.length) + (queryParams.length > 1 ? queryParams : '')
+            await data.client?.navigateTo({
+                url: commandKey.substring(SLUG_PREFIX.length) + (queryParams.length > 1 ? queryParams : '')
             });
         }
 
