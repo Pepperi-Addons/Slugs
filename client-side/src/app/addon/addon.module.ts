@@ -56,8 +56,6 @@ export const routes: Routes = [
         PepNgxLibModule,
         PepSizeDetectorModule,
         PepTopBarModule,
-        PepPageLayoutModule,
-        PepSizeDetectorModule,
         MatIconModule,
         PepIconModule,
         PepTopBarModule,

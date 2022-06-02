@@ -11,11 +11,11 @@ html {
 
 @mixin mapped-slug-item-container() {
     max-width: 600px;
-    height: 6rem;
-    border-radius: variables.$border-radius-md;
+    // height: 6rem;
     display: flex;
     justify-content: center;
     align-items: center;
+    border-radius: variables.$border-radius-md;
     padding-inline: variables.$spacing-lg;
 }
 

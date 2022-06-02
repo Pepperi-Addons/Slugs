@@ -22,7 +22,7 @@
                     </span>
                 </div>
 
-                <div>
+                <div class="slugs-area-overflow">
                     <ng-container *ngIf="mappedSlugs === null || mappedSlugs.length === 0; then emptyTemplate; else notEmptyTemplate"></ng-container>
                     <ng-template #emptyTemplate>
                         <div id="emptyDropArea" class="drop-slug-here-area" cdkDropList (cdkDropListDropped)="onDropSlug($event)">

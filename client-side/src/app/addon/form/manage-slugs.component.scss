@@ -6,31 +6,36 @@
 
 .mapped-slugs-container {
     display: grid;
-        grid-template-columns: auto 1fr;
-        grid-template-rows: auto 1fr;
-        grid-template-areas: 
-            "side-area    main-area";
+    height: 100%;
+    grid-template-columns: auto 1fr;
+    grid-template-areas: "side-area    main-area";
 
     .available-slugs-side-area {
         grid-area: side-area;
         width: 240px;
         max-width: 240px;
+        height: inherit;
+        overflow: auto;
         padding-top: variables.$spacing-2xl;
         margin-inline-end: variables.$double-content-margin;
     }
     
     .mapped-slugs-main-area {
+        display: grid;
+        grid-template-rows: auto 1fr;
         grid-area: main-area;
         padding-top: variables.$spacing-2xl;
-        
+        overflow: auto;
+        height: inherit;
+
         .mapped-slugs-top-area {
             height: variables.$top-bar-field-height;
             display: flex;
             align-items: center;
 
-            &.pep-border-bottom {
-                margin-bottom: variables.$content-margin;
-            }
+            // &.pep-border-bottom {
+            //     margin-bottom: variables.$content-margin;
+            // }
         }
         
         .drop-slug-here-area {
@@ -53,10 +58,18 @@
             }
         }
 
+        .slugs-area-overflow {
+            overflow: auto;
+        }
+
         .mapped-slugs-area {
+            // height: inherit;
             display: flex;
             flex-direction: column;
             gap: variables.$content-margin;
+            padding-top: variables.$content-margin;
+            padding-bottom: variables.$content-margin;
+            padding-inline: variables.$spacing-xs;
 
             &.cdk-drop-list-dragging {
                 ::ng-deep.placeholder-item {
