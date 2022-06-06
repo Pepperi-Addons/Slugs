@@ -40,7 +40,7 @@ export class ManageSlugs implements OnInit {
 
     private setAvailableSlugPermission(slug: string, disable: boolean) {
         // Find the item in the available slugs
-        const item = this.availableSlugs.find(as => as.data === slug);
+        const item = this.availableSlugs.find(as => as.data.key === slug);
         
         // If exist disable or enable it.
         if (item) {
@@ -49,10 +49,10 @@ export class ManageSlugs implements OnInit {
     }
 
     private addNewSlug(draggableItem: IPepDraggableItem, index: number) {
-        this.setAvailableSlugPermission(draggableItem.data, true);
+        this.setAvailableSlugPermission(draggableItem.data.key, true);
 
         // Add new mappedSlug to the mappedSlugs.
-        const mappedSlug = { slug: draggableItem.data };
+        const mappedSlug = { slug: draggableItem.data.key };
         this.mappedSlugs.splice(index, 0, mappedSlug);
     }
 
@@ -77,7 +77,7 @@ export class ManageSlugs implements OnInit {
             slugs = slugs.filter(slug => !slug.System);
 
             this.availableSlugs = slugs.map(slug => {
-                return { title: slug.Slug, data: slug.Slug }
+                return { title: slug.Slug, data: {key: slug.Slug } }
             }).sort((slug1, slug2) => {
                 if (slug1.title < slug2.title) { return -1; }
                 if (slug1.title > slug2.title) { return 1; }
