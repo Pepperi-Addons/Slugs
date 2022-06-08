@@ -26,7 +26,6 @@ import { AddSlugModule } from '../addon/Components/Add-Slug/add-slug.module';
 import { PepTextboxModule } from '@pepperi-addons/ngx-lib/textbox';
 import { PepSelectModule } from '@pepperi-addons/ngx-lib/select';
 import { TranslateLoader, TranslateModule, TranslateService, TranslateStore } from '@ngx-translate/core';
-import { PepDialogService } from '@pepperi-addons/ngx-lib/dialog';
 import { AddonService } from '../services/addon.service';
 import { AddonComponent } from './index';
 import { ManageSlugs } from './form/manage-slugs.component';
