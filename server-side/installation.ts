@@ -26,7 +26,8 @@ export async function install(client: Client, request: Request): Promise<any> {
                 { Name: 'Catalogs', Description: 'Default catalogs page', Slug: 'catalogs', System: true },
                 { Name: 'Cart', Description: 'Default cart page', Slug: 'cart', System: true },
                 { Name: 'Complete action', Description: 'Default complete action page', Slug: 'complete_action', System: true },
-                { Name: 'Account details', Description: 'Default account details page', Slug: 'account_details', System: true}];
+                { Name: 'Account details', Description: 'Default account details page', Slug: 'account_details', System: true},
+                { Name: 'Launch', Description: 'Default landing page', Slug: 'launch_page', System: true}];
 
     try {
 
