@@ -11,7 +11,8 @@ export interface ISlugData {
     Description: string;
     Slug: string;
     Hidden?: boolean;
-    System?: boolean
+    System?: boolean;
+    availableInMapping?: boolean;
 }
 
 export class SlugsService {

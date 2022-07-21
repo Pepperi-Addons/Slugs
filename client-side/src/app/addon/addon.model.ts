@@ -9,6 +9,7 @@ export interface ISlugData {
     Slug: string;
     Hidden?: boolean;
     System?: boolean;
+    availableInMapping?: boolean;
 
     // ModificationDateTime?: string;
     // CreationDateTime?: string;

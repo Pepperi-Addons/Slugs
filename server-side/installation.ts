@@ -15,19 +15,19 @@ export async function install(client: Client, request: Request): Promise<any> {
 
     const service = new SlugsService(client);
     const TABLE_NAME = 'Slugs';
-    const systemSlugs: ISlugData[] = [{ Name: 'Homepage', Description: 'Default home page', Slug: 'homepage', System: true },
-                { Name: 'Accounts', Description: 'Default accounts page', Slug: 'accounts', System: true },
-                { Name: 'Activities', Description: 'Default activities page', Slug: 'activities', System: true },
-                { Name: 'Users', Description: 'Default users page', Slug: 'users', System: true },
-                { Name: 'Contacts', Description: 'Default contacts page', Slug: 'contacts', System: true },
-                { Name: 'Transactions', Description: 'Default transactions page', Slug: 'transactions', System: true },
-                { Name: 'Details', Description: 'Default details page', Slug: 'details', System: true },
-                { Name: 'List', Description: 'Default list page', Slug: 'list', System: true },
-                { Name: 'Catalogs', Description: 'Default catalogs page', Slug: 'catalogs', System: true },
-                { Name: 'Cart', Description: 'Default cart page', Slug: 'cart', System: true },
-                { Name: 'Complete action', Description: 'Default complete action page', Slug: 'complete_action', System: true },
-                { Name: 'Account details', Description: 'Default account details page', Slug: 'account_details', System: true},
-                { Name: 'Launch', Description: 'Default landing page', Slug: 'launch_page', System: true}];
+    const systemSlugs: ISlugData[] = [{ Name: 'Homepage', Description: 'Default home page', Slug: 'homepage', System: true, availableInMapping: true },
+                { Name: 'Accounts', Description: 'Default accounts page', Slug: 'accounts', System: true, availableInMapping: false},
+                { Name: 'Activities', Description: 'Default activities page', Slug: 'activities', System: true, availableInMapping: false},
+                { Name: 'Users', Description: 'Default users page', Slug: 'users', System: true, availableInMapping: false},
+                { Name: 'Contacts', Description: 'Default contacts page', Slug: 'contacts', System: true, availableInMapping: false},
+                { Name: 'Transactions', Description: 'Default transactions page', Slug: 'transactions', System: true, availableInMapping: false},
+                { Name: 'Details', Description: 'Default details page', Slug: 'details', System: true, availableInMapping: false},
+                { Name: 'List', Description: 'Default list page', Slug: 'list', System: true, availableInMapping: false},
+                { Name: 'Catalogs', Description: 'Default catalogs page', Slug: 'catalogs', System: true, availableInMapping: false},
+                { Name: 'Cart', Description: 'Default cart page', Slug: 'cart', System: true, availableInMapping: false},
+                { Name: 'Complete action', Description: 'Default complete action page', Slug: 'complete_action', System: true, availableInMapping: false},
+                { Name: 'Account details', Description: 'Default account details page', Slug: 'account_details', System: true, availableInMapping: false},
+                { Name: 'Launch', Description: 'Default landing page', Slug: 'launch_page', System: true, availableInMapping: true}];
 
     try {
 

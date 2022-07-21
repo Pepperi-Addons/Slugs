@@ -74,7 +74,7 @@ export class ManageSlugs implements OnInit {
 
         await this.addonService.getSlugs().then((slugs: ISlugData[]) => {
             // TODO: Product ask to add this, when needed remove it.
-            slugs = slugs.filter(slug => !slug.System || slug.Slug == 'launch_page');
+            slugs = slugs.filter(slug => !slug.System || slug.availableInMapping == true);
 
             this.availableSlugs = slugs.map(slug => {
                 return { title: slug.Slug, data: {key: slug.Slug } }
