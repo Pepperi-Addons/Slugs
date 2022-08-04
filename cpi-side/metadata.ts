@@ -1,0 +1,28 @@
+export const legecyPages = [
+    '/homepage', 
+    '/accounts/home_page/:id',
+    '/details/:objectType/:id',
+    '/details/:objectType/:id/:apiName/:value', 
+    '/list/:listType',
+    '/list/:listType/:id',
+    '/catalogs/:transactionTypeName/:accountDestUID/:accountOriginUID',
+    '/transactions/scope_items/:id',
+    '/transactions/item_details/:id/:parentId',
+    '/transactions/child_details/:id/:parentId',
+    '/transactions/cart/:id',
+    '/cart/:InternalID/:id',
+    '/transactions/details/:id',
+    '/transactions/details/:id/:apiName/:value',
+    '/complete_action',
+    '/account_details/:id'
+    // 'activities', 
+    // 'users', 
+    // 'contacts', 
+    // 'transactions', 
+    // 'details', 
+    // 'list', 
+    // 'catalogs', 
+    // 'cart', 
+    // 'complete_action', 
+    // 'account_details'
+];

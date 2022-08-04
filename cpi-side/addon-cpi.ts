@@ -1,36 +1,7 @@
 import '@pepperi-addons/cpi-node'
-import { DataViewContext, PapiClient } from '@pepperi-addons/papi-sdk';
-
+import { DataViewHelper } from './helpers/data-view-helper';
+import LegacySlugParser from './helpers/slug-parser';
 export const router = Router();
-
-const legecyPages = [
-    'homepage', 
-    'accounts/home_page/:id',
-    'details/:objectType/:id',
-    'details/:objectType/:id/:apiName/:value', 
-    'list/:listType',
-    'list/:listType/:id',
-    'catalogs/:transactionTypeName/:accountDestUID/:accountOriginUID',
-    'transactions/scope_items/:id',
-    'transactions/item_details/:id/:parentId',
-    'transactions/child_details/:id/:parentId',
-    'transactions/cart/:id',
-    'cart/:InternalID/:id',
-    'transactions/details/:id',
-    'transactions/details/:id/:apiName/:value',
-    'complete_action',
-    'account_details/:id'
-    // 'activities', 
-    // 'users', 
-    // 'contacts', 
-    // 'transactions', 
-    // 'details', 
-    // 'list', 
-    // 'catalogs', 
-    // 'cart', 
-    // 'complete_action', 
-    // 'account_details'
-];
 
 // Get the slug by Key
 // router.get("/slugs/:key", async (req, res) => {
@@ -61,26 +32,23 @@ router.post('/get_page', async (req, res) => {
     const url = req.body.slug;
     // validateSlug(url, res);
     let slugPath = url.split('?')[0]; // before query params
-    // slug is the path 
-    const queryParams = queryParams2Object(url.split('?')[1])
+    
     // NOTE: path params are supported only for legacy pages   
-    const legacyPageIndex = getLegacyPageIndex(slugPath);
+    const parsedSlug = await new LegacySlugParser().parse(url);
 
     let resObj = {}
     // If this slug is legacy.
-    if (legacyPageIndex >= 0) {
-        const pathParams = getPathParamsForLegacy(legacyPageIndex, slugPath);
-
+    if (parsedSlug.slug) {
         resObj = {
             success: true,
             slug: slugPath,
             isLegacy: true,
-            pathParams: pathParams,
-            pageParams: queryParams,
+            pathParams: parsedSlug.params,
+            pageParams: parsedSlug.query,
         };
     } else { 
-        const slugObj = await getUserDefinedSlug(slugPath)
-        
+        const slugObj = await DataViewHelper.getUserDefinedSlug(slugPath);    
+        const queryParams = queryParams2Object(url.split('?')[1]);    
         if (slugObj) {
             resObj = {
                 success: true,
@@ -104,7 +72,7 @@ router.post('/get_page', async (req, res) => {
 router.get('/get_slugs_dataview', async (req, res) => {
     let resObj = {}
     
-    const slugDataView = await getSlugDataView();
+    const slugDataView = await DataViewHelper.getSlugDataView();
         
     if (slugDataView) {
         resObj = {
@@ -121,65 +89,6 @@ router.get('/get_slugs_dataview', async (req, res) => {
     res.json(resObj);
 });
 
-function removeFirstCharIfNeeded(str) {
-    if (str.length > 0 && str.startsWith('/')) {
-        return str.substring(1);
-    } else {
-        return str;
-    }
-}
-
-function getPathParamsForLegacy(legacyPageIndex: number, slugPath: string) {
-    const res = {};
-    let legecyPagePath = removeFirstCharIfNeeded(legecyPages[legacyPageIndex]);
-    slugPath = removeFirstCharIfNeeded(slugPath);
-    
-    const legacyParams = legecyPagePath.split('/:');
-    const slugsPathParams = slugPath.split('/');
-
-    if (legacyParams.length === slugsPathParams.length) {
-        for (let index = 1; index < legacyParams.length; index++) {
-            const legacyParam = legacyParams[index];
-            const slugsPathParam = slugsPathParams[index];
-            
-            res[legacyParam] = slugsPathParam;
-        }
-    }
-
-    return res;
-}
-
-function validateSlug(slug: string, res) {
-    // slug should start with /
-    if (!slug.startsWith('/')) {
-        res.json({
-            success: false,
-            message: 'Invalid slug'
-        });
-        return false;
-    }
-    else {
-        return true;
-    }
-}
-
-function getFirstPathParam(slug: string) {
-    slug = removeFirstCharIfNeeded(slug);
-    return slug.split('/')[0];
-}
-
-function getLegacyPageIndex(slug) {
-    for (let index = 0; index < legecyPages.length; index++) {
-        const legacyPage = legecyPages[index];
-        
-        if (slug.includes(legacyPage)) {
-            return index;
-        }
-    }
-
-    return -1;
-}
-
 function queryParams2Object(queryParams: string) {
     if (!queryParams) {
         return {};
@@ -192,27 +101,6 @@ function queryParams2Object(queryParams: string) {
         result[key] = value;
     });
     return result;
-}
-
-async function getSlugDataView() {
-    const ctx = { Name: 'Slugs' } as DataViewContext;
-    const slugsUiObj = await pepperi.UIObject.Create(ctx);
-    return slugsUiObj?.dataView;
-}
-
-async function getUserDefinedSlug(slug) {
-    const dataView = await getSlugDataView();
-    const fields = dataView?.Fields as any[];
-    const slugs = fields?.map(field => {
-        return {
-            url: field.FieldID,
-            pageUUID: field.Title
-        }
-    });
-
-    slug = getFirstPathParam(slug);
-    const slugObj = slugs?.find(x => x.url === slug);
-    return slugObj;
 }
 
 export async function load(configuration: any) {
@@ -237,6 +125,17 @@ export async function load(configuration: any) {
         await next(main);
     });
 
-    console.log('cpi side works!');
-    // Put your cpi side code here
 }
+router.post('/test_legacy_parser', async (req, res) => {
+    debugger;
+    const body = req.body;
+    const slug = body.slug;
+    const slugParser = new LegacySlugParser();
+    
+    const params = await slugParser.parse(slug);    
+    res.json({
+        success: true,
+        ...params
+
+    });
+});
