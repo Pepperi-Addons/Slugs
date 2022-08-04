@@ -3,7 +3,6 @@ import EventEmitter from 'events';
 import httpMocks, { RequestMethod } from 'node-mocks-http';
 import { Request, Response } from 'express';
 import { legecyPages } from '../metadata';
-import { DataViewHelper } from './data-view-helper';
 
 export interface SlugParseResult {
     slug: string;
