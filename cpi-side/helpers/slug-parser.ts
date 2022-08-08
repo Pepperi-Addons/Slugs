@@ -2,7 +2,7 @@
 import EventEmitter from 'events';
 import httpMocks, { RequestMethod } from 'node-mocks-http';
 import { Request, Response } from 'express';
-import { legecyPages } from '../metadata';
+import { legacyPages } from '../metadata';
 
 export interface SlugParseResult {
     slug: string;
@@ -11,7 +11,7 @@ export interface SlugParseResult {
     error: string;
 }
 
-class LegacySlugParser {
+export class LegacySlugParser {
     slugs: any[] = [];
     router: any
     constructor() {
@@ -21,7 +21,7 @@ class LegacySlugParser {
     }
     
     async loadSlugs() {
-        this.slugs = [...legecyPages]; // NOTE, only legacy pages are supported
+        this.slugs = [...legacyPages]; // NOTE, only legacy pages are supported
     }
     async loadRouter () {
         this.slugs.forEach(slug => {
@@ -80,5 +80,3 @@ class LegacySlugParser {
         };
     }
 }
-
-export default LegacySlugParser;

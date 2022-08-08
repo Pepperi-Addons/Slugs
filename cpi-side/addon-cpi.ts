@@ -1,6 +1,6 @@
 import '@pepperi-addons/cpi-node'
 import { DataViewHelper } from './helpers/data-view-helper';
-import LegacySlugParser from './helpers/slug-parser';
+import {LegacySlugParser} from './helpers/slug-parser';
 export const router = Router();
 
 // Get the slug by Key

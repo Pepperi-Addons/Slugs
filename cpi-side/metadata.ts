@@ -1,4 +1,4 @@
-export const legecyPages = [
+export const legacyPages = [
     '/homepage', 
     '/accounts/home_page/:id',
     '/details/:objectType/:id',
