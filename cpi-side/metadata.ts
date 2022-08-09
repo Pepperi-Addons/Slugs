@@ -14,7 +14,8 @@ export const legacyPages = [
     '/transactions/details/:id',
     '/transactions/details/:id/:apiName/:value',
     '/complete_action',
-    '/account_details/:id'
+    '/account_details/:id',
+    '/activities/details/:id'
     // 'activities', 
     // 'users', 
     // 'contacts', 
