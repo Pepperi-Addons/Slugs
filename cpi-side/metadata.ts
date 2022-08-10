@@ -1,6 +1,7 @@
 export const legacyPages = [
     '/homepage', 
     '/accounts/home_page/:id',
+    '/accounts/dashboard/:id',
     '/details/:objectType/:id',
     '/details/:objectType/:id/:apiName/:value', 
     '/list/:listType',
