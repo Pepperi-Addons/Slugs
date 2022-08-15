@@ -166,8 +166,8 @@ export class AddonComponent implements OnInit {
     setDataSource() {
         return {
             init: async (state) => {
-                //let query = 'order_by=Name';
-                this.slugsList = await this.addonService.getSlugs();
+                let query = 'order_by=Name';
+                this.slugsList = await this.addonService.getSlugs(query);
                 
                 this.systemSlugsList = this.slugsList.filter(slug => slug.System);
                 // Init the slugs limit
