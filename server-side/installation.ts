@@ -15,7 +15,7 @@ export async function install(client: Client, request: Request): Promise<any> {
 
     const service = new SlugsService(client);
     const TABLE_NAME = 'Slugs';
-    const systemSlugs: ISlugData[] = [{ Name: 'Homepage', Description: 'Default home page', Slug: 'homepage', System: true, availableInMapping: true },
+    const systemSlugs: ISlugData[] = [{ Name: 'Homepage', Description: 'Default home page', Slug: 'HomePage', System: true, availableInMapping: true },
                 { Name: 'Accounts', Description: 'Default accounts page', Slug: 'accounts', System: true, availableInMapping: false},
                 { Name: 'Activities', Description: 'Default activities page', Slug: 'activities', System: true, availableInMapping: false},
                 { Name: 'Users', Description: 'Default users page', Slug: 'users', System: true, availableInMapping: false},
@@ -44,7 +44,8 @@ export async function install(client: Client, request: Request): Promise<any> {
             Type: 'meta_data',
             Fields: {
                 Name: {
-                    Type: 'String'
+                    Type: 'String',
+                    Indexed: true
                 },
                 Description: {
                     Type: 'String'

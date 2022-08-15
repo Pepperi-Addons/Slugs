@@ -101,7 +101,7 @@ export class AddonComponent implements OnInit {
     ngOnInit() {
         this.pager = {
             type: 'pages',
-            size: 10,
+            size: 50,
             index: 0
         };
     }
@@ -166,7 +166,8 @@ export class AddonComponent implements OnInit {
     setDataSource() {
         return {
             init: async (state) => {
-                this.slugsList = await this.addonService.getSlugs();
+                let query = 'ORDER BY Slug ASC';
+                this.slugsList = await this.addonService.getSlugs(query);
                 this.systemSlugsList = this.slugsList.filter(slug => slug.System);
                 // Init the slugs limit
                 this.slugsNumLimit = 50 + this.systemSlugsList.length;
