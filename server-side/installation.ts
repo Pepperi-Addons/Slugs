@@ -41,7 +41,7 @@ export async function install(client: Client, request: Request): Promise<any> {
         
         await papiClient.addons.data.schemes.post({
             Name: TABLE_NAME,
-            Type: 'meta_data',
+            Type: 'indexed_data',
             Fields: {
                 Name: {
                     Type: 'String',
