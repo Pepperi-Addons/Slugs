@@ -6,7 +6,7 @@
     </ng-container>
 
     <ng-container pep-main-area>
-        <mat-tab-group #tabGroup class="editor-tabs" animationDuration="0ms" [selectedIndex]="currentTabIndex" (selectedTabChange)="onTabChanged($event)">
+        <mat-tab-group #tabGroup animationDuration="0ms" [selectedIndex]="currentTabIndex" (selectedTabChange)="onTabChanged($event)">
             <mat-tab label="{{'SLUGS' | translate}}">
                 <pep-generic-list title="{{'SLUGS' | translate}}" [selectionType]="'multi'"  [uuidMapping]="'Key'" [showTopBar]='true'
                     [inline]="true" [actions]="actions" [pager]="pager" [dataSource]="dataSource" (fieldClick)="onCustomizeFieldClick($event)"
