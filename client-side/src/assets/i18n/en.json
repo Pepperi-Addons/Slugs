@@ -32,7 +32,7 @@
         "USE_HYPHENS": "Use hyphens",
         "USE_LOWERCASE": "Use lower-case",
         "INCLUDE_RELEVANT_KEYWORDS": "Include relevant keywords",
-        "KEEP_IT_SHORT": "Keep ot short, 1-5 words",
+        "KEEP_IT_SHORT": "Keep it short, 1-5 words",
         "MAKE_READABLE": "Make them readable",
         "SLUG_LIMITAION_MSG" : "The number of slugs limit has been reached"
     },
