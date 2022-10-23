@@ -73,7 +73,16 @@ export class SlugsService {
             if(slugToUpsert.Name === '' || slugToUpsert.Slug === ''){
                 throw new Error(`Name & Slug fields can't be empty.`);  
             }
-
+            else if(/\s/g.test(slugToUpsert.Slug)){
+                throw new Error(`Slug field can't contain any spaces.`);  
+            }
+            else if(slugToUpsert.Slug !== slugToUpsert.Slug.toLowerCase()){
+                throw new Error(`Slug field should contain lowercase characters only.`); 
+            }
+            /*
+            hasUpperCase(str: string = ''){
+                return str.toLowerCase() != str;
+            }*/
             // change the slug field to lowercase and remove white spaces
             slugToUpsert.Slug = slugToUpsert.Slug.replace(/\s/g, "").toLowerCase(); 
 
