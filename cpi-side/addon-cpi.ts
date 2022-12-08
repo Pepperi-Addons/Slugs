@@ -109,7 +109,7 @@ export async function load(configuration: any) {
         const SLUG_PREFIX = 'SLUG_';
         const commandKey = data['CommandKey'] || '';
         if (commandKey.startsWith(SLUG_PREFIX)) {
-            const { DataObject, FieldID, UIObject, UIPage, client, CommandKey, ...rest } = data;
+            const { DataObject, FieldID, UIObject, UIPage, client, CommandKey, timers, clientLoop, clientFactory, callback, ...rest } = data;
             const queryParams = '?' + Object.keys(rest).map(key => `${key}=${rest[key]}`).join('&');
 
             await data.client?.navigateTo({
