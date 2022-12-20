@@ -6,6 +6,12 @@ export class DataViewHelper {
         return slugsUiObj?.dataView;
     }
 
+    // we will override the legacy slug if the user defined a slug with the same name
+    static async shouldOverrideLegacySlug(slug) {
+        const slugs = await DataViewHelper.getUserDefinedSlugs();
+        return slugs?.includes(slug);
+    }
+
     static async getUserDefinedSlugs() {
         const dataView = await DataViewHelper.getSlugDataView();
         const fields = dataView?.Fields as any[];
