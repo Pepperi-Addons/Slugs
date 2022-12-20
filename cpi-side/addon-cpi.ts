@@ -39,10 +39,12 @@ router.post('/get_page', async (req, res) => {
     let resObj = {}
     // If this slug is legacy.
     if (parsedSlug.slug) {
+        // some legacy pages can be overridden by mapping them to a new page
+        const shouldOverride = await DataViewHelper.shouldOverrideLegacySlug(slugPath);
         resObj = {
             success: true,
             slug: slugPath,
-            isLegacy: true,
+            isLegacy: shouldOverride ? false : true,
             pathParams: parsedSlug.params,
             pageParams: parsedSlug.query,
         };
