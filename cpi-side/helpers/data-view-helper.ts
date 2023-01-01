@@ -6,7 +6,7 @@ export class DataViewHelper {
         return slugsUiObj?.dataView;
     }
 
-    // we will override the legacy slug if the user defined a slug with the same name
+    // we will override the legacy slug if the user defined a slug with the same name 
     static async shouldOverrideLegacySlug(slug) {
         slug = DataViewHelper.removeFirstCharIfNeeded(slug);
         const slugs = await DataViewHelper.getUserDefinedSlugs();
