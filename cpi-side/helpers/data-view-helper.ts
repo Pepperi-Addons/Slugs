@@ -8,14 +8,23 @@ export class DataViewHelper {
 
     // we will override the legacy slug if the user defined a slug with the same name
     static async shouldOverrideLegacySlug(slug) {
+        slug = DataViewHelper.removeFirstCharIfNeeded(slug);
         const slugs = await DataViewHelper.getUserDefinedSlugs();
-        return slugs?.includes(slug);
+        const shouldOverride = slugs?.includes(slug);
+        let res;
+        if (shouldOverride) {
+           res = await DataViewHelper.getUserDefinedSlug(slug);
+        } else {
+            res = undefined
+        }
+        return res;
     }
+
 
     static async getUserDefinedSlugs() {
         const dataView = await DataViewHelper.getSlugDataView();
         const fields = dataView?.Fields as any[];
-        const slugs = fields?.map(field => field.FieldID);
+        const slugs = fields?.map(field => field.FieldID.toLowerCase());
         return slugs;
     }
 
@@ -24,7 +33,7 @@ export class DataViewHelper {
         const fields = dataView?.Fields as any[];
         const slugs = fields?.map(field => {
             return {
-                url: field.FieldID,
+                url: field.FieldID.toLowerCase(),
                 pageUUID: field.Title
             }
         });

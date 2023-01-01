@@ -45,6 +45,7 @@ router.post('/get_page', async (req, res) => {
             success: true,
             slug: slugPath,
             isLegacy: shouldOverride ? false : true,
+            ...(shouldOverride && { pageKey: shouldOverride.pageUUID }),
             pathParams: parsedSlug.params,
             pageParams: parsedSlug.query,
         };
