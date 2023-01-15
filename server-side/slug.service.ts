@@ -33,6 +33,190 @@ export class SlugsService {
         this.addonUUID = client.AddonUUID;
     }
 
+    private getBody(slug): ISlugData {
+        return {
+            Key: slug.Key || null,
+            Name: slug.Name,
+            Description: slug.Description,
+            Slug: slug.Slug || '',
+            Hidden: slug.Hidden || false,
+        };
+    }
+
+    private async upsertSlugsRelation() {
+        // Check if relation exist 
+        let uiFieldBankRelation = await this.getRelations("UIFieldBank");
+
+        if(!uiFieldBankRelation || uiFieldBankRelation?.length === 0) {            
+            // Create new
+            const uiBankFieldsRelation: Relation = {
+                RelationName: "UIFieldBank",
+                Name:"SlugsDataView",
+                Description:"Get the slugs dataview",
+                Type: "AddonAPI",
+                SubType: "NG11",
+                AddonUUID: this.client.AddonUUID,
+                AddonRelativeURL: "/api/slugs_dataview",
+                AddtionalDataTableName: "Slug"        
+            };
+
+            uiFieldBankRelation =  await this.upsertRelation(uiBankFieldsRelation);
+        } 
+        
+        return uiFieldBankRelation;
+    }
+
+    private async upsertSettingsRelation() {
+        const blockName = 'Settings';
+        const name = 'Slugs';
+
+        const addonBlockRelation: Relation = {
+            RelationName: "SettingsBlock",
+            GroupName: name,
+            SlugName: 'slugs',
+            Name: name,
+            Description: 'A list of slugs that can be mapped to pages',
+            Type: "NgComponent",
+            SubType: "NG14",
+            AddonUUID: this.addonUUID,
+            AddonRelativeURL: `file_${this.addonUUID}`,
+            ComponentName: `${blockName}Component`,
+            ModuleName: `${blockName}Module`,
+            ElementsModule: 'WebComponents',
+            ElementName: `settings-element-${this.addonUUID}`,
+        }; 
+        
+        await this.upsertRelation(addonBlockRelation);
+    }
+    
+    private async upsertRelation(relation): Promise<any> {
+        return await this.papiClient.post('/addons/data/relations', relation);
+    }
+
+    private async getRelations(relationName: string): Promise<any> {
+        return await this.papiClient.get(`/addons/data/relations?where=RelationName=${relationName}`);
+    }
+
+    private getSlugsDataViews(): Promise<DataView[]> {
+        const res = this.papiClient.metaData.dataViews.find({
+            where: `Context.Name='Slugs'`
+        });
+
+        return res;
+    }
+
+    /***********************************************************************************************/
+    /*                                  Public functions
+    /***********************************************************************************************/
+
+    async getSlugsDataViewsData() {
+        const dataPromises: Promise<any>[] = [];
+
+        // Get the slugs dataviews
+        // const dataViews = await this.papiClient.metaData.dataViews.find({
+        //     where: `Context.Name='Slugs'`
+        // });
+        dataPromises.push(this.getSlugsDataViews());
+
+        // Get the profiles
+        // const profiles = await this.papiClient.profiles.find();
+        dataPromises.push(this.papiClient.profiles.find());
+
+        // Get the pages
+        // const pages: Page[] = await this.papiClient.pages.find();
+        dataPromises.push(this.papiClient.pages.find());
+        
+        // wait for results and return them as object.
+        const arr = await Promise.all(dataPromises).then(res => res);
+        
+        return {
+            dataViews: arr[0],
+            profiles: arr[1].map(profile => { return { id: profile.InternalID.toString(), name: profile.Name } }),
+            pages: arr[2].map(page => { return { key: page.Key, name: page.Name } }), // Return projection of key & name
+        }
+    }
+
+    async getMappedSlugs() {
+        const mappedSlugs: any[] = [];
+        const dataViews = await this.getSlugsDataViews();
+
+        if (dataViews?.length === 1) {
+            const dataView = dataViews[0];
+
+            if (dataView && dataView.Fields) {
+                for (let index = 0; index < dataView.Fields.length; index++) {
+                    const field = dataView.Fields[index];
+                    mappedSlugs.push({
+                        slug: field.FieldID,
+                        pageKey: field.Title
+                    });
+                }
+            }
+        }
+
+        return mappedSlugs;
+    }
+
+    async upsertRelationsAndScheme() {
+        const TABLE_NAME = 'Slugs';
+
+        // upsert system slugs.
+        const systemSlugs: ISlugData[] = [
+            { Name: 'Homepage', Description: 'Default home page', Slug: 'HomePage', System: true, availableInMapping: true },
+            { Name: 'Accounts', Description: 'Default accounts page', Slug: 'accounts', System: true, availableInMapping: false},
+            { Name: 'Activities', Description: 'Default activities page', Slug: 'activities', System: true, availableInMapping: false},
+            { Name: 'Users', Description: 'Default users page', Slug: 'users', System: true, availableInMapping: false},
+            { Name: 'Contacts', Description: 'Default contacts page', Slug: 'contacts', System: true, availableInMapping: false},
+            { Name: 'Transactions', Description: 'Default transactions page', Slug: 'transactions', System: true, availableInMapping: false},
+            { Name: 'Details', Description: 'Default details page', Slug: 'details', System: true, availableInMapping: false},
+            { Name: 'List', Description: 'Default list page', Slug: 'list', System: true, availableInMapping: false},
+            { Name: 'Catalogs', Description: 'Default catalogs page', Slug: 'catalogs', System: true, availableInMapping: false},
+            { Name: 'Cart', Description: 'Default cart page', Slug: 'cart', System: true, availableInMapping: false},
+            { Name: 'Complete action', Description: 'Default complete action page', Slug: 'complete_action', System: true, availableInMapping: false},
+            { Name: 'Account details', Description: 'Default account details page', Slug: 'account_details', System: true, availableInMapping: false},
+            { Name: 'Launch', Description: 'Default landing page', Slug: 'launch_page', System: true, availableInMapping: true}
+        ];
+
+        // Insert only new system slugs
+        const allSlugs = await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).find();
+
+        for (let index = 0; index < systemSlugs.length; index++) {
+            const systemSlug = systemSlugs[index];
+            const isSlugExist = allSlugs.some(s => s.Slug === systemSlug.Slug);
+            
+            // Add the system slugs to ADAL if dont exist
+            if (!isSlugExist) {
+                await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).upsert(systemSlug);
+            }
+        }
+
+        await this.papiClient.addons.data.schemes.post({
+            Name: TABLE_NAME,
+            Type: 'indexed_data',
+            Fields: {
+                Name: {
+                    Type: 'String',
+                    Indexed: true
+                },
+                Description: {
+                    Type: 'String'
+                },
+                Slug: {
+                    Type: 'String'
+                },
+                PageType: {
+                    Type: 'String'
+                },
+                IsSystem: {
+                    Type: 'Bool'
+                }    
+            }
+        });
+
+        await this.upsertSlugsRelation();
+        await this.upsertSettingsRelation();
+    }
+    
     async getSlugs(options: FindOptions | undefined = undefined) {
         return await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).find(options) as ISlugData[];
     }
@@ -147,104 +331,11 @@ export class SlugsService {
         }
     }
 
-    getSlugsList(query: string = '') {
-        let addonURL = `/addons/data/${this.addonUUID}/Slugs` + query;
+    // getSlugsList(query: string = '') {
+    //     let addonURL = `/addons/data/${this.addonUUID}/Slugs` + query;
                 
-        return this.papiClient.get(encodeURI(addonURL)); 
-    }
-
-    private getBody(slug): ISlugData {
-        return {
-            Key: slug.Key || null,
-            Name: slug.Name,
-            Description: slug.Description,
-            Slug: slug.Slug || '',
-            Hidden: slug.Hidden || false,
-        };
-    }
-
-    async createSlugsRelation() {
-        // Check if relation exist 
-        let uiFieldBankRelation = await this.getRelations("UIFieldBank");
-
-        if(!uiFieldBankRelation || uiFieldBankRelation?.length === 0) {            
-            // Create new
-            const uiBankFieldsRelation: Relation = {
-                RelationName: "UIFieldBank",
-                Name:"SlugsDataView",
-                Description:"Get the slugs dataview",
-                Type: "AddonAPI",
-                SubType: "NG11",
-                AddonUUID: this.client.AddonUUID,
-                AddonRelativeURL: "/api/slugs_dataview",
-                AddtionalDataTableName: "Slug"        
-            };
-
-            uiFieldBankRelation =  await this.papiClient.post('/addons/data/relations', uiBankFieldsRelation);
-        } 
-        
-        return uiFieldBankRelation;
-    }
-
-    getRelations(relationName: string): Promise<any> {
-        return this.papiClient.get(`/addons/data/relations?where=RelationName=${relationName}`);
-    }
-
-    private getSlugsDataViews(): Promise<DataView[]> {
-        const res = this.papiClient.metaData.dataViews.find({
-            where: `Context.Name='Slugs'`
-        });
-
-        return res;
-    }
-    
-    async getSlugsDataViewsData() {
-        const dataPromises: Promise<any>[] = [];
-
-        // Get the slugs dataviews
-        // const dataViews = await this.papiClient.metaData.dataViews.find({
-        //     where: `Context.Name='Slugs'`
-        // });
-        dataPromises.push(this.getSlugsDataViews());
-
-        // Get the profiles
-        // const profiles = await this.papiClient.profiles.find();
-        dataPromises.push(this.papiClient.profiles.find());
-
-        // Get the pages
-        // const pages: Page[] = await this.papiClient.pages.find();
-        dataPromises.push(this.papiClient.pages.find());
-        
-        // wait for results and return them as object.
-        const arr = await Promise.all(dataPromises).then(res => res);
-        
-        return {
-            dataViews: arr[0],
-            profiles: arr[1].map(profile => { return { id: profile.InternalID.toString(), name: profile.Name } }),
-            pages: arr[2].map(page => { return { key: page.Key, name: page.Name } }), // Return projection of key & name
-        }
-    }
-
-    async getMappedSlugs() {
-        const mappedSlugs: any[] = [];
-        const dataViews = await this.getSlugsDataViews();
-
-        if (dataViews?.length === 1) {
-            const dataView = dataViews[0];
-
-            if (dataView && dataView.Fields) {
-                for (let index = 0; index < dataView.Fields.length; index++) {
-                    const field = dataView.Fields[index];
-                    mappedSlugs.push({
-                        slug: field.FieldID,
-                        pageKey: field.Title
-                    });
-                }
-            }
-        }
-
-        return mappedSlugs;
-    }
+    //     return this.papiClient.get(encodeURI(addonURL)); 
+    // }
 }
 
 export default SlugsService;

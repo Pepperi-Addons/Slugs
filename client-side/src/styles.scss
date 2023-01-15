@@ -1,6 +1,6 @@
-@use '~@pepperi-addons/ngx-lib/src/core/style/abstracts/variables';
-@use '~@pepperi-addons/ngx-lib/src/core/style/abstracts/mixins';
-@use '~@pepperi-addons/ngx-lib/src/core/style/abstracts/functions';
+@use '@pepperi-addons/ngx-lib/src/core/style/abstracts/variables';
+@use '@pepperi-addons/ngx-lib/src/core/style/abstracts/mixins';
+@use '@pepperi-addons/ngx-lib/src/core/style/abstracts/functions';
 
 /* You can add global styles to this file, and also import other style files */
 html {
@@ -35,11 +35,5 @@ html {
         .del-button {
             margin-top: variables.$form-field-title-height;
         }
-    }
-}
-
-.cdk-drag-preview {
-    &.mapped-slug-container {
-        @include mapped-slug-container();
     }
 }

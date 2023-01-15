@@ -1,6 +1,6 @@
-@use '~@pepperi-addons/ngx-lib/src/core/style/abstracts/variables';
-@use '~@pepperi-addons/ngx-lib/src/core/style/abstracts/mixins';
-@use '~@pepperi-addons/ngx-lib/src/core/style/abstracts/functions';
+@use '@pepperi-addons/ngx-lib/src/core/style/abstracts/variables';
+@use '@pepperi-addons/ngx-lib/src/core/style/abstracts/mixins';
+@use '@pepperi-addons/ngx-lib/src/core/style/abstracts/functions';
 
 @use '../../../styles';
 
@@ -87,6 +87,10 @@
             .mapped-slug-container { 
                 cursor: grab;
                 @include styles.mapped-slug-container();
+
+                &.cdk-drag-preview {
+                    // Nothing
+                }
 
                 &.cdk-drag-placeholder {
                     // opacity: 0;

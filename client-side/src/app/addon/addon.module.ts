@@ -12,7 +12,6 @@ import { PepNgxLibModule, PepFileService, PepAddonService } from '@pepperi-addon
 import { PepTopBarModule } from '@pepperi-addons/ngx-lib/top-bar';
 import { PepSizeDetectorModule } from '@pepperi-addons/ngx-lib/size-detector';
 import { PepPageLayoutModule } from '@pepperi-addons/ngx-lib/page-layout';
-import { PepIconRegistry, PepIconModule, pepIconSystemClose, pepIconArrowDownAlt, pepIconSystemBin } from '@pepperi-addons/ngx-lib/icon';
 import { PepButtonModule } from '@pepperi-addons/ngx-lib/button';
 import { PepDialogModule } from '@pepperi-addons/ngx-lib/dialog';
 import { PepMenuModule } from '@pepperi-addons/ngx-lib/menu';
@@ -26,15 +25,9 @@ import { AddSlugModule } from '../addon/Components/Add-Slug/add-slug.module';
 import { PepTextboxModule } from '@pepperi-addons/ngx-lib/textbox';
 import { PepSelectModule } from '@pepperi-addons/ngx-lib/select';
 import { TranslateLoader, TranslateModule, TranslateService, TranslateStore } from '@ngx-translate/core';
-import { AddonService } from '../services/addon.service';
 import { AddonComponent } from './index';
-import { ManageSlugs } from './form/manage-slugs.component';
-
-const pepIcons = [
-    pepIconSystemClose,
-    pepIconArrowDownAlt,
-    pepIconSystemBin
-];
+import { PepLinkModule } from '@pepperi-addons/ngx-lib/link';
+import { PepListModule } from '@pepperi-addons/ngx-lib/list';
 
 export const routes: Routes = [
     {
@@ -45,8 +38,7 @@ export const routes: Routes = [
 
 @NgModule({
     declarations: [
-        AddonComponent,
-        ManageSlugs
+        AddonComponent
     ],
     imports: [
         CommonModule,
@@ -56,7 +48,6 @@ export const routes: Routes = [
         PepSizeDetectorModule,
         PepTopBarModule,
         MatIconModule,
-        PepIconModule,
         PepTopBarModule,
         PepMenuModule,
         PepDraggableItemsModule,
@@ -64,7 +55,8 @@ export const routes: Routes = [
         PepPageLayoutModule,
         PepButtonModule,
         PepDialogModule,
-        // PepListModule,
+        PepLinkModule,
+        PepListModule,
         // PepSearchModule,
         PepTextboxModule,
         PepSelectModule,
@@ -72,30 +64,16 @@ export const routes: Routes = [
         MatTabsModule,
         PepGenericListModule,
         AddSlugModule,
-        TranslateModule.forChild({
-            loader: {
-                provide: TranslateLoader,
-                useFactory: (addonService: PepAddonService) => 
-                    PepAddonService.createMultiTranslateLoader(addonService, ['ngx-lib', 'ngx-composite-lib']),
-                deps: [PepAddonService]
-            }, isolate: false
-        }),
+        TranslateModule.forChild(),
         RouterModule.forChild(routes)
     ],
     exports:[AddonComponent],
-    providers: [
-        TranslateStore,
-        // When loading this module from route we need to add this here (because only this module is loading).
-        AddonService
-    ]
 })
 export class AddonModule {
     constructor(
         translate: TranslateService,
-        private pepIconRegistry: PepIconRegistry,
         private pepAddonService: PepAddonService
     ) {
         this.pepAddonService.setDefaultTranslateLang(translate);
-        this.pepIconRegistry.registerIcons(pepIcons);
     }
 }

@@ -1,17 +1,15 @@
-import { BehaviorSubject, Observable } from 'rxjs';
-import jwt from 'jwt-decode';
-import { MenuDataView, PapiClient } from '@pepperi-addons/papi-sdk';
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http'
+import { BehaviorSubject, Observable } from 'rxjs';
+import { MenuDataView } from '@pepperi-addons/papi-sdk';
 import { PepHttpService, PepSessionService, PepUtilitiesService } from '@pepperi-addons/ngx-lib';
-import { config } from 'addon.config';
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
+import { config } from 'src/app/addon.config';
 import { PepSelectionData } from '@pepperi-addons/ngx-lib/list';
 import { ISlugData } from '../addon/addon.model';
 import { IPepProfile } from '@pepperi-addons/ngx-lib/profile-data-views-list';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { PepDialogData, PepDialogService } from '@pepperi-addons/ngx-lib/dialog';
+import { coerceNumberProperty } from '@angular/cdk/coercion';
 
 interface IPageProj {
     key: string, 
@@ -19,14 +17,8 @@ interface IPageProj {
 }
 @Injectable({ providedIn: 'root' })
 export class AddonService {
-
+    private addonUUID;
     private readonly SLUGS_DATAVIEW_NAME = 'Slugs';
-
-    addonURL = '';
-    accessToken = '';
-    parsedToken: any
-    papiBaseURL = ''
-    addonUUID;
 
     // This subjects is for load the data views into map for better performance.
     private _dataViewsMap = new Map<string, MenuDataView>();
@@ -61,15 +53,6 @@ export class AddonService {
         return this._defaultProfileId;
     }
 
-    get papiClient(): PapiClient {
-        return new PapiClient({
-            baseURL: this.papiBaseURL,
-            token: this.sessionService.getIdpToken(),
-            addonUUID: this.addonUUID,
-            suppressLogging:true
-        })
-    }
-
     private _devServer = false;
     get devServer(): boolean {
         return this._devServer;
@@ -84,10 +67,10 @@ export class AddonService {
         private route: ActivatedRoute,
     ) {
         this.addonUUID = config.AddonUUID;
-        this.addonURL = `/addons/data/${this.addonUUID}/Slugs`;
-        const accessToken = this.sessionService.getIdpToken();
-        this.parsedToken = jwt(accessToken);
-        this.papiBaseURL = this.parsedToken["pepperi.baseurl"];
+        // this.addonURL = `/addons/data/${this.addonUUID}/Slugs`;
+        // const accessToken = this.sessionService.getIdpToken();
+        // this.parsedToken = jwt(accessToken);
+        // this.papiBaseURL = this.parsedToken["pepperi.baseurl"];
         this._devServer = this.route.snapshot.queryParamMap.get('devServer') === 'true';
 
         this.loadSlugsDataViewsData();
@@ -166,7 +149,7 @@ export class AddonService {
                 });
                 this.notifySlugsDataViewsMapChange();
             } else {
-                const profileId: number = this.utilitiesService.coerceNumberProperty(this._defaultProfileId);
+                const profileId: number = coerceNumberProperty(this._defaultProfileId);
                 this.createNewSlugsDataView(profileId);
             }
         });
@@ -230,22 +213,4 @@ export class AddonService {
         const baseUrl = this.getBaseUrl(this.addonUUID);
         return this.httpService.postHttpCall(`${baseUrl}/slugs`, body).toPromise();
     }
-
-    async get(endpoint: string): Promise<any> {
-        return await this.papiClient.get(endpoint);
-    }
-
-    async post(endpoint: string, body: any): Promise<any> {
-        return await this.papiClient.post(endpoint, body);
-    }
-
-    pepGet(endpoint: string): Observable<any> {
-        return this.httpService.getPapiApiCall(endpoint);
-    }
-
-    pepPost(endpoint: string, body: any): Observable<any> {
-        return this.httpService.postPapiApiCall(endpoint, body);
-
-    }
-
 }

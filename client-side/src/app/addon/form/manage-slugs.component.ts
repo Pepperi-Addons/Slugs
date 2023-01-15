@@ -9,12 +9,13 @@ import { IPepOption, PepLoaderService } from '@pepperi-addons/ngx-lib';
 import { IPepButtonClickEvent } from '@pepperi-addons/ngx-lib/button';
 import { MenuDataView, MenuDataViewField, Page } from '@pepperi-addons/papi-sdk';
 import { IMappedSlug, ISlugData } from '../addon.model';
+import { NavigationService } from '../../services/navigation.service';
 
 @Component({
     templateUrl: './manage-slugs.component.html',
     styleUrls: ['./manage-slugs.component.scss']
 })
-export class ManageSlugs implements OnInit {
+export class ManageSlugsComponent implements OnInit {
     title: string = '';
     dataView: MenuDataView;
     availableSlugs: Array<IPepDraggableItem> = [];
@@ -28,7 +29,8 @@ export class ManageSlugs implements OnInit {
         public translate: TranslateService,
         public dialogService: PepDialogService,
         public router: Router,
-        public activatedRoute: ActivatedRoute
+        public activatedRoute: ActivatedRoute,
+        private navigationService: NavigationService
     ) {
         // Load the pages id & names.
         this.addonService.pagesChange$.subscribe(pages => {
@@ -123,11 +125,7 @@ export class ManageSlugs implements OnInit {
     }
 
     goBack() {
-        this.router.navigate(['..'], {
-            relativeTo: this.activatedRoute,
-            queryParams: { tabIndex: 1 },
-            queryParamsHandling: 'merge'
-        });
+        this.navigationService.back();
     }
 
     backClicked() {

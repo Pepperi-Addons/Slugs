@@ -1,7 +1,7 @@
-//@import '~@pepperi-addons/ngx-lib/theming';
-@use '~@pepperi-addons/ngx-lib/src/core/style/abstracts/variables' as ngx-variables;
-@use '~@pepperi-addons/ngx-lib/src/core/style/abstracts/functions' as ngx-functions;
-@use '~@pepperi-addons/ngx-lib/src/core/style/abstracts/mixins' as ngx-mixins;
+//@import '@pepperi-addons/ngx-lib/theming';
+@use '@pepperi-addons/ngx-lib/src/core/style/abstracts/variables' as ngx-variables;
+@use '@pepperi-addons/ngx-lib/src/core/style/abstracts/functions' as ngx-functions;
+@use '@pepperi-addons/ngx-lib/src/core/style/abstracts/mixins' as ngx-mixins;
 
 //@import 'ngx-lib/src/core/style/abstracts/variables';
 //@import 'ngx-lib/src/core/style/abstracts/mixins';

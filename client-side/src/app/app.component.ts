@@ -15,6 +15,6 @@ export class AppComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.customizationService.setThemeVariables();
+        // this.customizationService.setThemeVariables();
     }
 }

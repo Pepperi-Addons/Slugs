@@ -9,11 +9,12 @@ import { PepDialogData, PepDialogService } from "@pepperi-addons/ngx-lib/dialog"
 import { AddSlugComponent } from '../addon/Components/Add-Slug/add-slug.component';
 import { MatDialogRef } from "@angular/material/dialog";
 import { PepSelectionData } from "@pepperi-addons/ngx-lib/list";
-import { IPepOption } from '@pepperi-addons/ngx-lib';
 import { GridDataViewField, MenuDataView, Page, Profile } from "@pepperi-addons/papi-sdk";
 import { IPepProfileDataViewsCard, IPepProfile, IPepProfileDataViewClickEvent, IPepProfileDataView } from '@pepperi-addons/ngx-lib/profile-data-views-list';
 import { ISlugData } from "./addon.model";
 import { MatTabChangeEvent } from "@angular/material/tabs";
+import { coerceNumberProperty } from "@angular/cdk/coercion";
+import { NavigationService } from "../services/navigation.service";
 
 @Component({
     selector: 'addon-module',
@@ -52,7 +53,8 @@ export class AddonComponent implements OnInit {
         public dialogService: PepDialogService,
         public utilitiesService: PepUtilitiesService,
         private genericListService: PepGenericListService,
-       
+        private navigationService: NavigationService
+      
     ) {
         this.layoutService.onResize$.subscribe(size => {
             this.screenSize = size;
@@ -85,7 +87,7 @@ export class AddonComponent implements OnInit {
             this.availableProfiles = this._allProfiles.filter(p => this.profileDataViewsList.findIndex(pdv => pdv.profileId === p.id) === -1);
         });
 
-        const index = this.utilitiesService.coerceNumberProperty(this.activatedRoute.snapshot.queryParamMap.get('tabIndex'), 0);
+        const index = coerceNumberProperty(this.activatedRoute.snapshot.queryParamMap.get('tabIndex'), 0);
         this.setCurrentTabIndex(index);
     }
 
@@ -111,12 +113,7 @@ export class AddonComponent implements OnInit {
     // -----------------------------------------------------------------------------
     onTabChanged(tabChangeEvent: MatTabChangeEvent): void {
         this.setCurrentTabIndex(tabChangeEvent.index);
-        
-        this.router.navigate([], {
-            relativeTo: this.activatedRoute,
-            queryParams: { tabIndex: this.currentTabIndex }, 
-            queryParamsHandling: 'merge', // remove to replace all query params by provided
-        });
+        this.navigationService.navigateToTab(this.currentTabIndex);
     }
     
     // -----------------------------------------------------------------------------
@@ -190,7 +187,7 @@ export class AddonComponent implements OnInit {
                         Fields: [
                             {
                                 FieldID: "Name",
-                                Type: 'Link',
+                                Type: 'TextBox',
                                 Title: this.translate.instant("SLUGS_TAB.NAME"),
                                 Mandatory: false,
                                 ReadOnly: true
@@ -394,19 +391,9 @@ export class AddonComponent implements OnInit {
         this.profileDataViewsList.push(profileDataView);
     }
     
-    private navigateToManageSlugsDataView(dataViewId: string) {
-        this.router.navigate([dataViewId], {
-            relativeTo: this.activatedRoute,
-            queryParams: {
-                'tabIndex': null
-            },
-            queryParamsHandling: 'merge'
-        });
-    }
-    
     onDataViewEditClicked(event: IPepProfileDataViewClickEvent): void {
         console.log(`edit on ${event.dataViewId} was clicked`);
-        this.navigateToManageSlugsDataView(event.dataViewId);
+        this.navigationService.navigateToDataView(event.dataViewId);
     }
 
     onDataViewDeleteClicked(event: IPepProfileDataViewClickEvent): void {
@@ -433,7 +420,7 @@ export class AddonComponent implements OnInit {
 
     onSaveNewProfileClicked(event: string): void {
         console.log(`save new profile was clicked for id - ${event} `);
-        const profileId: number = this.utilitiesService.coerceNumberProperty(event);
+        const profileId: number = coerceNumberProperty(event);
         this.createNewSlugsDataViewForProfile(profileId);
     }
 }
