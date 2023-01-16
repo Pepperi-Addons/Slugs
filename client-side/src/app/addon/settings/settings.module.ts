@@ -8,6 +8,7 @@ import { NavigationService } from '../../services/navigation.service';
 import { config } from '../../addon.config';
 import { AddonService } from 'src/app/services/addon.service';
 import { PepDialogModule } from '@pepperi-addons/ngx-lib/dialog';
+import { IsUrlPipe } from '@pepperi-addons/ngx-lib/link';
 
 @NgModule({
     declarations: [
@@ -30,7 +31,8 @@ import { PepDialogModule } from '@pepperi-addons/ngx-lib/dialog';
     providers: [
         TranslateStore,
         NavigationService,
-        AddonService
+        AddonService,
+        IsUrlPipe
     ]
 })
 export class SettingsModule {
