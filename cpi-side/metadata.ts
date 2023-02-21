@@ -1,30 +1,27 @@
 export const legacyPages = [
-    '/homepage', 
-    '/accounts/home_page/:id',
-    '/accounts/dashboard/:id',
-    '/details/:objectType/:id',
-    '/details/:objectType/:id/:apiName/:value', 
-    '/list/:listType',
-    '/list/:listType/:id',
-    '/catalogs/:transactionTypeName/:accountDestUID/:accountOriginUID',
-    '/transactions/scope_items/:id',
-    '/transactions/item_details/:id/:parentId',
-    '/transactions/child_details/:id/:parentId',
-    '/transactions/cart/:id',
-    '/cart/:InternalID/:id',
-    '/transactions/details/:id',
-    '/transactions/details/:id/:apiName/:value',
-    '/complete_action',
-    '/account_details/:id',
-    '/activities/details/:id'
-    // 'activities', 
-    // 'users', 
-    // 'contacts', 
-    // 'transactions', 
-    // 'details', 
-    // 'list', 
-    // 'catalogs', 
-    // 'cart', 
-    // 'complete_action', 
-    // 'account_details'
+    '/homepage', // homepage
+
+    // account dashboard  - already implemented
+    '/accounts/home_page/:id', // account dashboard
+    '/accounts/dashboard/:id', // account dashboard duplicate from above
+    
+    // generic lists   
+    '/list/all_activities',
+    '/list/accounts',
+    '/list/users',
+    '/list/contacts',
+    '/list/items', // TODO check if this is used 
+
+    // order center
+    '/transactions/scope_items/:id', // order center - already implemented
+    '/transactions/item_details/:id/:parentId', 
+    '/transactions/matrix/:id/:parentId', // TODO need to define this
+    // cart
+    '/transactions/cart/:id', // cart - already implemented
+
+    // forms
+    '/transactions/details/:id', // order details
+    '/accounts/details/:id', // account info
+    '/activities/details/:id', // general activity - implemented
+   
 ];
