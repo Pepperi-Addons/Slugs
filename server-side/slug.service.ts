@@ -1,4 +1,4 @@
-import { PapiClient, InstalledAddon, FindOptions, Page, DataView, Relation } from '@pepperi-addons/papi-sdk'
+import { PapiClient, InstalledAddon, FindOptions, Page, DataView, Relation, Subscription } from '@pepperi-addons/papi-sdk'
 import { Client } from '@pepperi-addons/debug-server';
 import { v4 as uuid } from 'uuid';
 import { resolve } from 'dns';
@@ -105,6 +105,10 @@ export class SlugsService {
         return res;
     }
 
+    private async upsertSlugDataView(dataView): Promise<DataView> {
+        return await this.papiClient.metaData.dataViews.upsert(dataView);
+    }
+
     /***********************************************************************************************/
     /*                                  Public functions
     /***********************************************************************************************/
@@ -136,7 +140,7 @@ export class SlugsService {
         }
     }
 
-    async getMappedSlugs() {
+    async getMappedSlugs(): Promise<any[]> {
         const mappedSlugs: any[] = [];
         const dataViews = await this.getSlugsDataViews();
 
@@ -219,6 +223,16 @@ export class SlugsService {
     
     async getSlugs(options: FindOptions | undefined = undefined) {
         return await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).find(options) as ISlugData[];
+    }
+
+    async getSlug(key: string) {
+        const slugs = await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).find({
+            where: `Key = '${key}'`,
+            include_deleted: true,
+        }) as ISlugData[];
+
+        return slugs[0] || undefined;
+        // return await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).key(key).get() as ISlugData;
     }
 
     async upsertSlug(body) {
@@ -335,7 +349,87 @@ export class SlugsService {
     //     let addonURL = `/addons/data/${this.addonUUID}/Slugs` + query;
                 
     //     return this.papiClient.get(encodeURI(addonURL)); 
-    // }
+    // }\
+
+    async deleteSlugMappings(body: any): Promise<void> {
+        const obj = body?.Message?.ModifiedObjects[0];
+        console.log(`obj - ${obj}`);
+        
+        if (obj) {
+            // If the field id is hidden AND the value is true (this slug is deleted)
+            if (obj.ModifiedFields?.filter(field => field.FieldID === 'Hidden' && field.NewValue === true)) {
+                console.log(`obj.ObjectKey - ${obj.ObjectKey}`);
+                const slug = await this.getSlug(obj.ObjectKey);
+
+                console.log(`slug - ${JSON.stringify(slug)}`);
+
+                if (slug) {
+                    // Get all mapped slugs (from all the roles) and remove the deleted slug from the list.
+                    const slugsDataViews = await this.getSlugsDataViews();
+                    
+                    for (let index = 0; index < slugsDataViews.length; index++) {
+                        const dataView = slugsDataViews[index];
+                        
+                        // Delete the mapped slug from list.
+                        let shouldUpdate = false;
+                        if (dataView && dataView.Fields) {
+                            console.log(`dataView before - ${JSON.stringify(dataView)}`);
+
+                            for (let fieldIndex = 0; fieldIndex < dataView.Fields.length; fieldIndex++) {
+                                const field = dataView.Fields[fieldIndex];
+
+                                if (field.FieldID === slug.Slug) {
+                                    dataView.Fields.splice(fieldIndex, 1);
+                                    shouldUpdate = true;
+                                    break;
+                                }
+                            }
+
+                            console.log(`dataView after - ${JSON.stringify(dataView)}`);
+                        }
+
+                        // Update the list of mapped slugs.
+                        if (shouldUpdate) {
+                            this.upsertSlugDataView(dataView);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+
+    /***********************************************************************************************/
+    /*                                  PNS functions
+    /***********************************************************************************************/
+
+    async subscribeSeleteSlug(key: string, functionPath: string): Promise<Subscription> {
+        return await this.papiClient.notification.subscriptions.upsert({
+            Key: key,
+            AddonUUID: this.addonUUID,
+            AddonRelativeURL: functionPath,
+            Type: 'data',
+            Name: key,
+            FilterPolicy: {
+                Action: ['update'],
+                ModifiedFields: ['Hidden'],
+                Resource: [TABLE_NAME],
+                AddonUUID: [this.addonUUID]
+            }
+        });
+    }
+    
+    async unsubscribeSeleteSlug(key: string, functionPath: string): Promise<Subscription> {
+        return await this.papiClient.notification.subscriptions.upsert({
+            Hidden: true,
+            Key: key,
+            AddonUUID: this.addonUUID,
+            AddonRelativeURL: functionPath,
+            Type: 'data',
+            Name: key,
+            FilterPolicy: {}
+        });
+    }
 }
 
 export default SlugsService;

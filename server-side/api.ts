@@ -43,3 +43,11 @@ export async function get_mapped_slugs(client: Client, request: Request): Promis
     }
 }
 
+export async function on_delete_slug(client:Client, request: Request): Promise<any> {
+    try {
+        const service = new SlugsService(client);
+        await service.deleteSlugMappings(request.body);
+    } catch(err) {
+        throw new Error(`Failed to delete slug mappings. error - ${err}`);
+    }
+}

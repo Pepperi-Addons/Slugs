@@ -9,10 +9,14 @@ The error Message is importent! it will be written in the audit log and help the
 import { Client, Request } from '@pepperi-addons/debug-server'
 import { SlugsService } from './slug.service';
 
+const pnsKeyForSlugs = 'delete_slug_subscription';
+const pnsFunctionPathForSlugs = '/api/on_delete_slug';
+
 export async function install(client: Client, request: Request): Promise<any> {
     try {
         const service = new SlugsService(client)
         await service.upsertRelationsAndScheme();
+        await service.subscribeSeleteSlug(pnsKeyForSlugs, pnsFunctionPathForSlugs);
     } catch (err) {
         throw new Error(`Failed to create ADAL Tables. error - ${err}`);
     }
@@ -21,7 +25,12 @@ export async function install(client: Client, request: Request): Promise<any> {
 }
 
 export async function uninstall(client: Client, request: Request): Promise<any> {
-    return {success:true,resultObject:{}}
+    try {
+        const service = new SlugsService(client)
+        await service.unsubscribeSeleteSlug(pnsKeyForSlugs, pnsFunctionPathForSlugs);
+    } catch (err) {
+        throw new Error(`Failed to unsubscribe from PNS. error - ${err}`);
+    }
 }
 
 export async function upgrade(client: Client, request: Request): Promise<any> {
