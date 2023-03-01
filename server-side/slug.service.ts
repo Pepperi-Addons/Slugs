@@ -1,4 +1,4 @@
-import { PapiClient, InstalledAddon, FindOptions, Page, DataView, Relation, Subscription } from '@pepperi-addons/papi-sdk'
+import { PapiClient, InstalledAddon, FindOptions, Page, DataView, Relation, Subscription, AddonData } from '@pepperi-addons/papi-sdk'
 import { Client } from '@pepperi-addons/debug-server';
 import { v4 as uuid } from 'uuid';
 import { resolve } from 'dns';
@@ -162,38 +162,6 @@ export class SlugsService {
     }
 
     async upsertRelationsAndScheme() {
-        const TABLE_NAME = 'Slugs';
-
-        // upsert system slugs.
-        const systemSlugs: ISlugData[] = [
-            { Name: 'Homepage', Description: 'Default home page', Slug: 'HomePage', System: true, availableInMapping: true },
-            { Name: 'Accounts', Description: 'Default accounts page', Slug: 'accounts', System: true, availableInMapping: false},
-            { Name: 'Activities', Description: 'Default activities page', Slug: 'activities', System: true, availableInMapping: false},
-            { Name: 'Users', Description: 'Default users page', Slug: 'users', System: true, availableInMapping: false},
-            { Name: 'Contacts', Description: 'Default contacts page', Slug: 'contacts', System: true, availableInMapping: false},
-            { Name: 'Transactions', Description: 'Default transactions page', Slug: 'transactions', System: true, availableInMapping: false},
-            { Name: 'Details', Description: 'Default details page', Slug: 'details', System: true, availableInMapping: false},
-            { Name: 'List', Description: 'Default list page', Slug: 'list', System: true, availableInMapping: false},
-            { Name: 'Catalogs', Description: 'Default catalogs page', Slug: 'catalogs', System: true, availableInMapping: false},
-            { Name: 'Cart', Description: 'Default cart page', Slug: 'cart', System: true, availableInMapping: false},
-            { Name: 'Complete action', Description: 'Default complete action page', Slug: 'complete_action', System: true, availableInMapping: false},
-            { Name: 'Account details', Description: 'Default account details page', Slug: 'account_details', System: true, availableInMapping: false},
-            { Name: 'Launch', Description: 'Default landing page', Slug: 'launch_page', System: true, availableInMapping: true}
-        ];
-
-        // Insert only new system slugs
-        const allSlugs = await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).find();
-
-        for (let index = 0; index < systemSlugs.length; index++) {
-            const systemSlug = systemSlugs[index];
-            const isSlugExist = allSlugs.some(s => s.Slug === systemSlug.Slug);
-            
-            // Add the system slugs to ADAL if dont exist
-            if (!isSlugExist) {
-                await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).upsert(systemSlug);
-            }
-        }
-
         await this.papiClient.addons.data.schemes.post({
             Name: TABLE_NAME,
             Type: 'indexed_data',
@@ -216,6 +184,40 @@ export class SlugsService {
                 }    
             }
         });
+
+        // upsert system slugs.
+        const systemSlugs: ISlugData[] = [
+            { Name: 'Homepage', Description: 'Default home page', Slug: 'HomePage', System: true, availableInMapping: true },
+            { Name: 'Accounts', Description: 'Default accounts page', Slug: 'accounts', System: true, availableInMapping: false},
+            { Name: 'Activities', Description: 'Default activities page', Slug: 'activities', System: true, availableInMapping: false},
+            { Name: 'Users', Description: 'Default users page', Slug: 'users', System: true, availableInMapping: false},
+            { Name: 'Contacts', Description: 'Default contacts page', Slug: 'contacts', System: true, availableInMapping: false},
+            { Name: 'Transactions', Description: 'Default transactions page', Slug: 'transactions', System: true, availableInMapping: false},
+            { Name: 'Details', Description: 'Default details page', Slug: 'details', System: true, availableInMapping: false},
+            { Name: 'List', Description: 'Default list page', Slug: 'list', System: true, availableInMapping: false},
+            { Name: 'Catalogs', Description: 'Default catalogs page', Slug: 'catalogs', System: true, availableInMapping: false},
+            { Name: 'Cart', Description: 'Default cart page', Slug: 'cart', System: true, availableInMapping: false},
+            { Name: 'Complete action', Description: 'Default complete action page', Slug: 'complete_action', System: true, availableInMapping: false},
+            { Name: 'Account details', Description: 'Default account details page', Slug: 'account_details', System: true, availableInMapping: false},
+            { Name: 'Launch', Description: 'Default landing page', Slug: 'launch_page', System: true, availableInMapping: true}
+        ];
+
+        let allSlugs: AddonData[] = [];
+        try {
+            allSlugs = await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).find();
+        } catch {
+            // Do nothing.
+        }
+
+        for (let index = 0; index < systemSlugs.length; index++) {
+            const systemSlug = systemSlugs[index];
+            const isSlugExist = allSlugs.some(s => s.Slug === systemSlug.Slug);
+            
+            // Add the system slugs to ADAL if dont exist
+            if (!isSlugExist) {
+                await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).upsert(systemSlug);
+            }
+        }
 
         await this.upsertSlugsRelation();
         await this.upsertSettingsRelation();
@@ -403,7 +405,7 @@ export class SlugsService {
     /*                                  PNS functions
     /***********************************************************************************************/
 
-    async subscribeSeleteSlug(key: string, functionPath: string): Promise<Subscription> {
+    async subscribeDeleteSlug(key: string, functionPath: string): Promise<Subscription> {
         return await this.papiClient.notification.subscriptions.upsert({
             Key: key,
             AddonUUID: this.addonUUID,
@@ -419,7 +421,7 @@ export class SlugsService {
         });
     }
     
-    async unsubscribeSeleteSlug(key: string, functionPath: string): Promise<Subscription> {
+    async unsubscribeDeleteSlug(key: string, functionPath: string): Promise<Subscription> {
         return await this.papiClient.notification.subscriptions.upsert({
             Hidden: true,
             Key: key,

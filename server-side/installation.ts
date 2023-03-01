@@ -16,7 +16,7 @@ export async function install(client: Client, request: Request): Promise<any> {
     try {
         const service = new SlugsService(client)
         await service.upsertRelationsAndScheme();
-        await service.subscribeSeleteSlug(pnsKeyForSlugs, pnsFunctionPathForSlugs);
+        await service.subscribeDeleteSlug(pnsKeyForSlugs, pnsFunctionPathForSlugs);
     } catch (err) {
         throw new Error(`Failed to create ADAL Tables. error - ${err}`);
     }
@@ -27,7 +27,7 @@ export async function install(client: Client, request: Request): Promise<any> {
 export async function uninstall(client: Client, request: Request): Promise<any> {
     try {
         const service = new SlugsService(client)
-        await service.unsubscribeSeleteSlug(pnsKeyForSlugs, pnsFunctionPathForSlugs);
+        await service.unsubscribeDeleteSlug(pnsKeyForSlugs, pnsFunctionPathForSlugs);
     } catch (err) {
         throw new Error(`Failed to unsubscribe from PNS. error - ${err}`);
     }
@@ -37,6 +37,7 @@ export async function upgrade(client: Client, request: Request): Promise<any> {
     try {
         const service = new SlugsService(client)
         await service.upsertRelationsAndScheme();
+        await service.subscribeDeleteSlug(pnsKeyForSlugs, pnsFunctionPathForSlugs);
     } catch (err) {
         throw new Error(`Failed to create ADAL Tables. error - ${err}`);
     }
