@@ -140,7 +140,7 @@ export class AddonComponent implements OnInit {
                     {
                         title: this.translate.instant("ACTIONS.DELETE"),
                         handler: async (ddd) => {
-                            this.showDeleteAssetMSG();
+                            this.showDeleteSlugMSG();
                         }
                     }
                 ]
@@ -149,7 +149,7 @@ export class AddonComponent implements OnInit {
                     {
                         title: this.translate.instant("ACTIONS.DELETE"),
                         handler: async (ddd) => {
-                            this.showDeleteAssetMSG();
+                            this.showDeleteSlugMSG();
                         }
                     }
                 ]
@@ -293,7 +293,7 @@ export class AddonComponent implements OnInit {
             this.openSlugDLG(slug);
     }
 
-    showDeleteAssetMSG(callback?: any){
+    showDeleteSlugMSG(callback?: any){
         var self = this;
 
         if(this.checkIfSlugsCanBeAmended('delete')){
@@ -305,19 +305,17 @@ export class AddonComponent implements OnInit {
             });
 
             this.dialogService.openDefaultDialog(dialogData).afterClosed()
-            .subscribe((isDeletePressed) => {
+            .subscribe(async (isDeletePressed) => {
                 if (isDeletePressed) {
-                    this.deleteSlugs();
-
+                    await this.deleteSlugs();
                 }
             });
         }
     }
 
-    deleteSlugs(){
-        this.addonService.upsertSlug(null, true, this.slugSelectionData).then((res) => {
-            this.dataSource = this.setDataSource();
-        });
+    async deleteSlugs(){
+        await this.addonService.upsertSlug(null, true, this.slugSelectionData);
+        this.dataSource = this.setDataSource();
     }
 
     checkIfSlugsCanBeAmended(oper: string, key: string = null){

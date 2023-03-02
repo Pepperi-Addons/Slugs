@@ -215,6 +215,7 @@ export class SlugsService {
             
             // Add the system slugs to ADAL if dont exist
             if (!isSlugExist) {
+                systemSlug.Key = uuid();
                 await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).upsert(systemSlug);
             }
         }

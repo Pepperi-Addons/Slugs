@@ -130,29 +130,28 @@ export class AddonService {
         return this.httpService.getHttpCall(`${baseUrl}/slugs?${query || ''}`).toPromise();
     }
 
-    loadSlugsDataViewsData() {
+    async loadSlugsDataViewsData() {
         this.clearData();
 
         const baseUrl = this.getBaseUrl(this.addonUUID);
-        this.httpService.getHttpCall(`${baseUrl}/get_slugs_data_views_data`).toPromise().then(res => {
-            this._pages = res.pages;
-            this.notifyPagesChange();
+        const res = await this.httpService.getHttpCall(`${baseUrl}/get_slugs_data_views_data`).toPromise();
+        this._pages = res.pages;
+        this.notifyPagesChange();
 
-            this._profiles = res.profiles;
-            const repProfile = this._profiles.find(profile => profile.name?.toLowerCase() === 'rep');
-            this._defaultProfileId = repProfile?.id || '';
-            this.notifyProfilesChange();
+        this._profiles = res.profiles;
+        const repProfile = this._profiles.find(profile => profile.name?.toLowerCase() === 'rep');
+        this._defaultProfileId = repProfile?.id || '';
+        this.notifyProfilesChange();
 
-            if (res.dataViews.length > 0) {
-                res.dataViews.forEach(dataView => {
-                    this.upsertDataViewToMap(dataView);
-                });
-                this.notifySlugsDataViewsMapChange();
-            } else {
-                const profileId: number = coerceNumberProperty(this._defaultProfileId);
-                this.createNewSlugsDataView(profileId);
-            }
-        });
+        if (res.dataViews.length > 0) {
+            res.dataViews.forEach(dataView => {
+                this.upsertDataViewToMap(dataView);
+            });
+            this.notifySlugsDataViewsMapChange();
+        } else {
+            const profileId: number = coerceNumberProperty(this._defaultProfileId);
+            this.createNewSlugsDataView(profileId);
+        }
     }
 
     createNewSlugsDataView(profileId: number) {
@@ -203,7 +202,6 @@ export class AddonService {
     }
 
     async upsertSlug(slug: ISlugData, isDelete: boolean = false, selectedObj: PepSelectionData = null) {
-
         let body = {
             slug: slug,
             isDelete: isDelete,
@@ -211,6 +209,14 @@ export class AddonService {
         };
         
         const baseUrl = this.getBaseUrl(this.addonUUID);
-        return this.httpService.postHttpCall(`${baseUrl}/slugs`, body).toPromise();
+        const res = await this.httpService.postHttpCall(`${baseUrl}/slugs`, body).toPromise();
+        if (isDelete) {
+            // Addd timeout to wait for the data to be deleted (PFS subscription).
+            setTimeout(async () => {
+                await this.loadSlugsDataViewsData();
+            }, 3000);
+        }
+
+        return res;
     }
 }

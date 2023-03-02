@@ -66,16 +66,15 @@ export class AddSlugComponent implements OnInit {
         return true;
     }
 
-    createSlug(event){
+    async createSlug(event) {
         if(this.checkSlugValidation(this.data.slug.Slug)){
-            this.addonService.upsertSlug(this.data.slug, false).then((res) => {
-                if(res.success){
-                    this.dialogRef?.close(true);
-                }
-                else{
-                    this.validateMsg = res.message;
-                }
-            });
+            const res = await this.addonService.upsertSlug(this.data.slug, false);
+            if(res.success){
+                this.dialogRef?.close(true);
+            }
+            else{
+                this.validateMsg = res.message;
+            }
         }
     }
 
