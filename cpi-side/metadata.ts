@@ -1,7 +1,7 @@
 export const legacyPages = [
     '/homepage', // homepage
     
-    '/settings', // settings
+    '/settings/home', // settings
 
     // account dashboard  - already implemented
     '/accounts/home_page/:id', // account dashboard
