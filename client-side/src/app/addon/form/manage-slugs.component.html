@@ -51,11 +51,10 @@
 
 <ng-template #mappedSlugTemplate let-mappedSlug="mappedSlug">
     <div class="fields-wrapper">
-        <pep-textbox [label]="'MANAGE_SLUG.SLUG_TITLE' | translate" [value]="mappedSlug.slug" [disabled]="true">
+        <pep-textbox [label]="(mappedSlug.slug === 'Application_Header' ? 'MANAGE_SLUG.HEADER_TITLE' : 'MANAGE_SLUG.SLUG_TITLE') | translate" [value]="mappedSlug.slug" [disabled]="true">
         </pep-textbox>
-        
-        <pep-select [label]="'MANAGE_SLUG.SELECT_PAGE_TITLE' | translate"
-            [options]='pagesOptions' [value]="mappedSlug.pageKey" [emptyOption]="false"
+        <pep-select [label]="(mappedSlug.slug === 'Application_Header' ? 'MANAGE_SLUG.SELECT_HEADER_TITLE' : 'MANAGE_SLUG.SELECT_PAGE_TITLE') | translate"
+            [options]="mappedSlug.slug === 'Application_Header' ? headersOptions : pagesOptions" [value]="mappedSlug.pageKey" [emptyOption]="false"
             (valueChange)="onPageChanged($event, mappedSlug)">
         </pep-select>
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { MenuDataView } from '@pepperi-addons/papi-sdk';
-import { PepHttpService, PepSessionService, PepUtilitiesService } from '@pepperi-addons/ngx-lib';
+import { IPepOption, PepHttpService, PepSessionService, PepUtilitiesService } from '@pepperi-addons/ngx-lib';
 import { config } from 'src/app/addon.config';
 import { PepSelectionData } from '@pepperi-addons/ngx-lib/list';
 import { ISlugData } from '../addon/addon.model';
@@ -10,6 +10,7 @@ import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { PepDialogData, PepDialogService } from '@pepperi-addons/ngx-lib/dialog';
 import { coerceNumberProperty } from '@angular/cdk/coercion';
+
 
 interface IPageProj {
     key: string, 
@@ -35,8 +36,16 @@ export class AddonService {
     //     return this._pages;
     // }
     private _pagesSubject = new BehaviorSubject<ReadonlyArray<IPageProj>>(this._pages);
+    
     get pagesChange$(): Observable<ReadonlyArray<IPageProj>> {
         return this._pagesSubject.asObservable();
+    }
+
+    private _headers: Array<IPepOption> = null;
+    private _headersSubject = new BehaviorSubject<ReadonlyArray<IPepOption>>(this._headers);
+    
+    get headersChange$(): Observable<ReadonlyArray<IPepOption>> {
+        return this._headersSubject.asObservable();
     }
 
     private _profiles: Array<IPepProfile> = [];
@@ -100,6 +109,10 @@ export class AddonService {
         this._pagesSubject.next(this._pages);
     }
     
+    private notifyHeaderChange() {
+        this._headersSubject.next(this._headers);
+    }
+    
     private notifyProfilesChange() {
         this._profilesSubject.next(this._profiles);
     }
@@ -135,7 +148,19 @@ export class AddonService {
 
         const baseUrl = this.getBaseUrl(this.addonUUID);
         const res = await this.httpService.getHttpCall(`${baseUrl}/get_slugs_data_views_data`).toPromise();
+        
+        const headerURL = this.getBaseUrl('9bc8af38-dd67-4d33-beb0-7d6b39a6e98d');
+        const headers = await this.httpService.getHttpCall(`${headerURL}/headers`).toPromise();
+
+        if(headers?.length){
+            this._headers =  headers?.map(header => {
+                return { key: header.Key, value: header.name }
+            });
+            this.notifyHeaderChange();
+        }
+
         this._pages = res.pages;
+
         this.notifyPagesChange();
 
         this._profiles = res.profiles;
