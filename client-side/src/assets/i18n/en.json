@@ -43,7 +43,9 @@
         "MAPPED_SLUGS_TITLE_HINT": "(Drag & Drop anywhere from available slugs)",
         "EMPTY_DROP_AREA_TEXT": "Drop here from available slugs",
         "SLUG_TITLE": "Slug",
-        "SELECT_PAGE_TITLE": "Select page"
+        "HEADER_TITLE": "Header",
+        "SELECT_PAGE_TITLE": "Select page",
+        "SELECT_HEADER_TITLE": "Select header"
     },
     "VALIDATION": {
         "EMPTY_SLUG": "Slug can't be empty",

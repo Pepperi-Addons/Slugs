@@ -21,6 +21,7 @@ export class ManageSlugsComponent implements OnInit {
     availableSlugs: Array<IPepDraggableItem> = [];
     mappedSlugs: Array<IMappedSlug> = [];
     pagesOptions: IPepOption[] = [];
+    headersOptions: IPepOption[] = [];
     isFinishLoading = false;
 
     constructor(
@@ -38,6 +39,14 @@ export class ManageSlugsComponent implements OnInit {
                 return { key: page.key, value: page.name }
             });
         });
+
+        this.addonService.headersChange$.subscribe(headers => {
+            this.headersOptions = headers?.map(header => {
+                return { key: header.key, value: header.value }
+            });
+        });
+
+        
     }
 
     private setAvailableSlugPermission(slug: string, disable: boolean) {
@@ -79,13 +88,17 @@ export class ManageSlugsComponent implements OnInit {
             slugs = slugs.filter(slug => !slug.System || slug.availableInMapping == true);
 
             this.availableSlugs = slugs.map(slug => {
-                return { title: slug.Slug, data: {key: slug.Slug } }
+                return { title: slug.Slug , data: {key: slug.Slug } }
             }).sort((slug1, slug2) => {
                 if (slug1.title < slug2.title) { return -1; }
                 if (slug1.title > slug2.title) { return 1; }
                 return 0;
             });
         });
+
+        // add the application header mapping. 
+        this.availableSlugs = [{ title: 'ApplicationHeader', data: {key: 'Application_Header'}},...this.availableSlugs]
+        
 
         const dataViews: MenuDataView[] = await this.addonService.getSlugsDataView(dataViewId);
         if (dataViews?.length === 1) {
