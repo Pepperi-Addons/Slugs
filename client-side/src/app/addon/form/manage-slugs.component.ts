@@ -96,11 +96,13 @@ export class ManageSlugsComponent implements OnInit {
             });
         });
 
-        // add the application header mapping. 
-        this.availableSlugs = [{ title: 'ApplicationHeader', data: {key: 'Application_Header'}},...this.availableSlugs]
-        
-
         const dataViews: MenuDataView[] = await this.addonService.getSlugsDataView(dataViewId);
+
+        // check if has headers -> add it to options
+        if(this.headersOptions?.length > 0){
+            this.availableSlugs = [{ title: 'ApplicationHeader', data: {key: 'Application_Header'}},...this.availableSlugs]
+        }
+       
         if (dataViews?.length === 1) {
             this.dataView = dataViews[0];
 

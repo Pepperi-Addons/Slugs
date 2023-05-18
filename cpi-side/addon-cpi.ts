@@ -28,7 +28,6 @@ export const router = Router();
 // });
 
 router.post('/get_page', async (req, res) => {
-    // debugger;
     const url = req.body.slug;
     // validateSlug(url, res);
     let slugPath = url.split('?')[0]; // before query params
@@ -130,7 +129,6 @@ export async function load(configuration: any) {
 
 }
 router.post('/test_legacy_parser', async (req, res) => {
-    debugger;
     const body = req.body;
     const slug = body.slug;
     const slugParser = new LegacySlugParser();

@@ -149,14 +149,20 @@ export class AddonService {
         const baseUrl = this.getBaseUrl(this.addonUUID);
         const res = await this.httpService.getHttpCall(`${baseUrl}/get_slugs_data_views_data`).toPromise();
         
-        const headerURL = this.getBaseUrl('9bc8af38-dd67-4d33-beb0-7d6b39a6e98d');
-        const headers = await this.httpService.getHttpCall(`${headerURL}/headers`).toPromise();
+        try{
+            // TODO - remove the uuid - waiting to mapping on NGINX 
+            const headerURL = this.getBaseUrl('9bc8af38-dd67-4d33-beb0-7d6b39a6e98d');
+            const headers = await this.httpService.getHttpCall(`${headerURL}/headers`).toPromise();
 
-        if(headers?.length){
-            this._headers =  headers?.map(header => {
-                return { key: header.Key, value: header.name }
-            });
-            this.notifyHeaderChange();
+            if(headers?.length){
+                this._headers =  headers?.map(header => {
+                    return { key: header.Key, value: header.name }
+                });
+                this.notifyHeaderChange();
+            }
+        }
+        catch(err){
+
         }
 
         this._pages = res.pages;
