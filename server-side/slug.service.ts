@@ -109,6 +109,10 @@ export class SlugsService {
         return await this.papiClient.metaData.dataViews.upsert(dataView);
     }
 
+    private async upsertSlugInternal(slug: ISlugData) {
+        return await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).upsert(slug);
+    }
+    
     /***********************************************************************************************/
     /*                                  Public functions
     /***********************************************************************************************/
@@ -204,7 +208,7 @@ export class SlugsService {
 
         let allSlugs: AddonData[] = [];
         try {
-            allSlugs = await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).find();
+            allSlugs = await this.getSlugs();
         } catch {
             // Do nothing.
         }
@@ -216,7 +220,7 @@ export class SlugsService {
             // Add the system slugs to ADAL if dont exist
             if (!isSlugExist) {
                 systemSlug.Key = uuid();
-                await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).upsert(systemSlug);
+                await this.upsertSlugInternal(systemSlug);
             }
         }
 
@@ -226,16 +230,6 @@ export class SlugsService {
     
     async getSlugs(options: FindOptions | undefined = undefined) {
         return await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).find(options) as ISlugData[];
-    }
-
-    async getSlug(key: string) {
-        const slugs = await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).find({
-            where: `Key = '${key}'`,
-            include_deleted: true,
-        }) as ISlugData[];
-
-        return slugs[0] || undefined;
-        // return await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).key(key).get() as ISlugData;
     }
 
     async upsertSlug(body) {
@@ -256,7 +250,7 @@ export class SlugsService {
                         let tmpBody = this.getBody(slugList[i]);
                         tmpBody.Hidden = true;
 
-                        await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).upsert(tmpBody);
+                        await this.upsertSlugInternal(tmpBody);
                     }
                     else {
                         throw new Error(`System slug ${slugList[i].Slug} can't be deleted`);
@@ -288,19 +282,17 @@ export class SlugsService {
             slugToUpsert.Slug = slugToUpsert.Slug.replace(/\s/g, "").toLowerCase(); 
 
             // Add new Slug 
-            if(slugToUpsert.Key === null){
+            if (slugToUpsert.Key === null) {
+                // get list of slugs & filter by slug field
+                let tmpList = slugList.filter( (slug) => {
+                    return slug.Slug == slugToUpsert.Slug;
+                });
 
-            // get list of slugs & filter by slug field
-            let tmpList = slugList.filter( (slug) => {
-                return slug.Slug == slugToUpsert.Slug;
-            });
-
-            // check if slug is allready exits
-            if(tmpList.length === 0){
-                    
-                const numOfSystemSlugs = slugList.filter( (slug) => {
-                                return slug.System && slug.System == true;
-                        }).length;
+                // check if slug is allready exits
+                if(tmpList.length === 0) {
+                    const numOfSystemSlugs = slugList.filter( (slug) => {
+                            return slug.System && slug.System == true;
+                    }).length;
 
                     // Limit the num of slugs to 50 (not included the system slugs)
                     if( slugList.length >= 50 + numOfSystemSlugs){
@@ -315,18 +307,15 @@ export class SlugsService {
                     // create new slug
                     return {
                         success: true,
-                        body: await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).upsert(slugToUpsert)
+                        body: await this.upsertSlugInternal(slugToUpsert)
                     }
-            }
-            else{
-                return {
-                        success: false,
-                        message: `Slug ${slugToUpsert.Slug} already exists`
+                } else {
+                    return {
+                            success: false,
+                            message: `Slug ${slugToUpsert.Slug} already exists`
+                    }
                 }
-            }
-            }
-            else {
-
+            } else {
                 // get list of slugs filter by key field
                 let tmpList = slugList.filter( (slug) => {
                     return slug.Key == slugToUpsert.Key;
@@ -342,7 +331,7 @@ export class SlugsService {
                 // Update slug or Delete from API slug 
                 return {
                     success: true,
-                    body: await this.papiClient.addons.data.uuid(this.addonUUID).table(TABLE_NAME).upsert(slugToUpsert)
+                    body: await this.upsertSlugInternal(slugToUpsert)
                 }
             } 
         }
@@ -362,10 +351,13 @@ export class SlugsService {
             // If the field id is hidden AND the value is true (this slug is deleted)
             if (obj.ModifiedFields?.filter(field => field.FieldID === 'Hidden' && field.NewValue === true)) {
                 console.log(`obj.ObjectKey - ${obj.ObjectKey}`);
-                const slug = await this.getSlug(obj.ObjectKey);
+                const slug = await this.getSlugs({
+                    where: `Key = '${obj.ObjectKey}'`,
+                    include_deleted: true
+                })[0] || undefined;
 
-                console.log(`slug - ${JSON.stringify(slug)}`);
-
+                // console.log(`slug - ${slug ? JSON.stringify(slug) : 'undefined'}`);
+ 
                 if (slug) {
                     // Get all mapped slugs (from all the roles) and remove the deleted slug from the list.
                     const slugsDataViews = await this.getSlugsDataViews();
