@@ -344,48 +344,54 @@ export class SlugsService {
     // }\
 
     async deleteSlugMappings(body: any): Promise<void> {
-        const obj = body?.Message?.ModifiedObjects[0];
-        console.log(`obj - ${obj}`);
-        
-        if (obj) {
-            // If the field id is hidden AND the value is true (this slug is deleted)
-            if (obj.ModifiedFields?.filter(field => field.FieldID === 'Hidden' && field.NewValue === true)) {
-                console.log(`obj.ObjectKey - ${obj.ObjectKey}`);
-                const slug = await this.getSlugs({
-                    where: `Key = '${obj.ObjectKey}'`,
-                    include_deleted: true
-                })[0] || undefined;
 
-                // console.log(`slug - ${slug ? JSON.stringify(slug) : 'undefined'}`);
- 
-                if (slug) {
-                    // Get all mapped slugs (from all the roles) and remove the deleted slug from the list.
-                    const slugsDataViews = await this.getSlugsDataViews();
+        for (let modifiedObjectIndex = 0; modifiedObjectIndex < body?.Message?.ModifiedObjects.length; modifiedObjectIndex++) {
+            const obj = body?.Message?.ModifiedObjects[modifiedObjectIndex];
+            
+            if (obj) {
+                console.log(`obj - ${JSON.stringify(obj)}`);
+
+                // If the field id is hidden AND the value is true (this slug is deleted)
+                if (obj.ModifiedFields?.filter(field => field.FieldID === 'Hidden' && field.NewValue === true)) {
+                    console.log(`obj is hidden, ObjectKey - ${obj.ObjectKey}`);
+                    const slugs = await this.getSlugs({
+                        where: `Key = '${obj.ObjectKey}'`,
+                        include_deleted: true
+                    });
+
+                    const slug = slugs?.length > 0 ? slugs[0] : undefined;
                     
-                    for (let index = 0; index < slugsDataViews.length; index++) {
-                        const dataView = slugsDataViews[index];
+                    if (slug) {
+                        console.log(`slug - ${JSON.stringify(slug)}`);
+
+                        // Get all mapped slugs (from all the roles) and remove the deleted slug from the list.
+                        const slugsDataViews = await this.getSlugsDataViews();
                         
-                        // Delete the mapped slug from list.
-                        let shouldUpdate = false;
-                        if (dataView && dataView.Fields) {
-                            console.log(`dataView before - ${JSON.stringify(dataView)}`);
+                        for (let index = 0; index < slugsDataViews.length; index++) {
+                            const dataView = slugsDataViews[index];
+                            
+                            // Delete the mapped slug from list.
+                            let shouldUpdate = false;
+                            if (dataView && dataView.Fields) {
+                                console.log(`dataView before - ${JSON.stringify(dataView)}`);
 
-                            for (let fieldIndex = 0; fieldIndex < dataView.Fields.length; fieldIndex++) {
-                                const field = dataView.Fields[fieldIndex];
+                                for (let fieldIndex = 0; fieldIndex < dataView.Fields.length; fieldIndex++) {
+                                    const field = dataView.Fields[fieldIndex];
 
-                                if (field.FieldID === slug.Slug) {
-                                    dataView.Fields.splice(fieldIndex, 1);
-                                    shouldUpdate = true;
-                                    break;
+                                    if (field.FieldID === slug.Slug) {
+                                        dataView.Fields.splice(fieldIndex, 1);
+                                        shouldUpdate = true;
+                                        break;
+                                    }
                                 }
+
+                                console.log(`dataView after - ${JSON.stringify(dataView)}`);
                             }
 
-                            console.log(`dataView after - ${JSON.stringify(dataView)}`);
-                        }
-
-                        // Update the list of mapped slugs.
-                        if (shouldUpdate) {
-                            this.upsertSlugDataView(dataView);
+                            // Update the list of mapped slugs.
+                            if (shouldUpdate) {
+                                this.upsertSlugDataView(dataView);
+                            }
                         }
                     }
                 }
