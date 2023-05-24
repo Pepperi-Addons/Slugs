@@ -390,7 +390,8 @@ export class SlugsService {
 
                             // Update the list of mapped slugs.
                             if (shouldUpdate) {
-                                this.upsertSlugDataView(dataView);
+                                await this.upsertSlugDataView(dataView);
+                                console.log(`dataView is updated`);
                             }
                         }
                     }
