@@ -159,7 +159,7 @@ export class AddonService {
 
                 if(headers?.length){
                     this._headers =  headers?.map(header => {
-                        return { key: header.Key, value: header.name }
+                        return { key: header.Key, value: header.Name }
                     });
                     this.notifyHeaderChange();
                 }
