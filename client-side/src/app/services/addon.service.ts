@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { MenuDataView } from '@pepperi-addons/papi-sdk';
+import { MenuDataView, PapiClient } from '@pepperi-addons/papi-sdk';
 import { IPepOption, PepHttpService, PepSessionService, PepUtilitiesService } from '@pepperi-addons/ngx-lib';
 import { config } from 'src/app/addon.config';
 import { PepSelectionData } from '@pepperi-addons/ngx-lib/list';
@@ -155,11 +155,12 @@ export class AddonService {
             if(isAppHeaderAddonInstalled){
                 // TODO - remove the uuid - waiting to mapping on NGINX 
                 const headerURL = this.getBaseUrl(`${appHeaderUUID}`);
-                const headers = await this.httpService.getHttpCall(`${headerURL}/headers`).toPromise();
 
+                const headers = await this.httpService.getHttpCall(`${headerURL}/headers`).toPromise();
+                
                 if(headers?.length){
-                    this._headers =  headers?.map(header => {
-                        return { key: header.Key, value: header.Name }
+                    this._headers =  headers?.filter(header =>  header.Data.Published === true )
+                                             .map(header => { return { key: header.Data.Key, value: header.Data.Name }
                     });
                     this.notifyHeaderChange();
                 }
