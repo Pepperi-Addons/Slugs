@@ -152,7 +152,7 @@ export class AddonService {
         try{
             const appHeaderUUID = '9bc8af38-dd67-4d33-beb0-7d6b39a6e98d';
             const isAppHeaderAddonInstalled = await firstValueFrom(this.httpService.getPapiApiCall(`/addons/installed_addons/${appHeaderUUID}`))
-            debugger;
+
             if(isAppHeaderAddonInstalled){
                 // TODO - remove the uuid - waiting to mapping on NGINX 
                 const headerURL = this.getBaseUrl(`${appHeaderUUID}`);
