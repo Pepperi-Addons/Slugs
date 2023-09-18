@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { MenuDataView } from '@pepperi-addons/papi-sdk';
+import { MenuDataView, PapiClient } from '@pepperi-addons/papi-sdk';
 import { IPepOption, PepHttpService, PepSessionService, PepUtilitiesService } from '@pepperi-addons/ngx-lib';
 import { config } from 'src/app/addon.config';
 import { PepSelectionData } from '@pepperi-addons/ngx-lib/list';
 import { ISlugData } from '../addon/addon.model';
-import { IPepProfile } from '@pepperi-addons/ngx-lib/profile-data-views-list';
+import { IPepProfile, IPepProfileDataView, IPepProfileDataViewSaveClickEvent } from '@pepperi-addons/ngx-lib/profile-data-views-list';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { PepDialogData, PepDialogService } from '@pepperi-addons/ngx-lib/dialog';
@@ -152,14 +152,16 @@ export class AddonService {
         try{
             const appHeaderUUID = '9bc8af38-dd67-4d33-beb0-7d6b39a6e98d';
             const isAppHeaderAddonInstalled = await firstValueFrom(this.httpService.getPapiApiCall(`/addons/installed_addons/${appHeaderUUID}`))
+
             if(isAppHeaderAddonInstalled){
                 // TODO - remove the uuid - waiting to mapping on NGINX 
                 const headerURL = this.getBaseUrl(`${appHeaderUUID}`);
-                const headers = await this.httpService.getHttpCall(`${headerURL}/headers`).toPromise();
 
+                const headers = await this.httpService.getHttpCall(`${headerURL}/headers`).toPromise();
+                
                 if(headers?.length){
-                    this._headers =  headers?.map(header => {
-                        return { key: header.Key, value: header.Name }
+                    this._headers =  headers?.filter(header =>  header.PublishedVersion)
+                                             .map(header => { return { key: header.Data.Key, value: header.Data.Name }
                     });
                     this.notifyHeaderChange();
                 }
@@ -185,11 +187,11 @@ export class AddonService {
             this.notifySlugsDataViewsMapChange();
         } else {
             const profileId: number = coerceNumberProperty(this._defaultProfileId);
-            this.createNewSlugsDataView(profileId);
+            await this.createNewSlugsDataView(profileId);
         }
     }
 
-    createNewSlugsDataView(profileId: number) {
+    private async createNewSlugsDataView(profileId: number) {
         const dataView: MenuDataView = {
             Type: 'Menu',
             Hidden: false,
@@ -203,7 +205,32 @@ export class AddonService {
             Fields: []
         }
 
-        return this.saveSlugsDataView(dataView);
+        await this.saveSlugsDataView(dataView);
+    }
+
+    async createSlugsDataView(profileId: number, dataViewToCopyFrom: IPepProfileDataView, dataViewToOverride: IPepProfileDataView) {
+        
+        // If there is dataView to copy from, Copy from it.
+        if (dataViewToCopyFrom) {
+            const dv = this.dataViewsMap.get(dataViewToCopyFrom.dataViewId);
+            
+            if (dv) {
+                const dataViewToSave = JSON.parse(JSON.stringify(dv));
+                
+                // Override the dataView with the new data
+                if (dataViewToOverride) {
+                    const dvToOverride = this.dataViewsMap.get(dataViewToOverride.dataViewId);
+                    dataViewToSave.InternalID = dvToOverride?.InternalID;
+                } else { // Save it as new dataView
+                    delete dataViewToSave['InternalID'];
+                }
+
+                dataViewToSave.Context.Profile.InternalID = profileId;
+                await this.saveSlugsDataView(dataViewToSave);
+            }
+        } else {
+            await this.createNewSlugsDataView(profileId);
+        }
     }
 
     async deleteSlugsDataView(dataView: MenuDataView) {

@@ -10,7 +10,7 @@ import { AddSlugComponent } from '../addon/Components/Add-Slug/add-slug.componen
 import { MatDialogRef } from "@angular/material/dialog";
 import { PepSelectionData } from "@pepperi-addons/ngx-lib/list";
 import { GridDataViewField, MenuDataView, Page, Profile } from "@pepperi-addons/papi-sdk";
-import { IPepProfileDataViewsCard, IPepProfile, IPepProfileDataViewClickEvent, IPepProfileDataView } from '@pepperi-addons/ngx-lib/profile-data-views-list';
+import { IPepProfileDataViewsCard, IPepProfile, IPepProfileDataViewClickEvent, IPepProfileDataView, IPepProfileDataViewSaveClickEvent } from '@pepperi-addons/ngx-lib/profile-data-views-list';
 import { ISlugData } from "./addon.model";
 import { MatTabChangeEvent } from "@angular/material/tabs";
 import { coerceNumberProperty } from "@angular/cdk/coercion";
@@ -365,12 +365,6 @@ export class AddonComponent implements OnInit {
     //                              Mappings tab
     // -----------------------------------------------------------------------------
     
-    private createNewSlugsDataViewForProfile(profileId: number) {
-        if (profileId > 0) {
-            this.addonService.createNewSlugsDataView(profileId);
-        }
-    }
-
     private createNewProfileDataViewCard(dataView: MenuDataView) {
         this.dataViewsMap.set(dataView.InternalID.toString(), dataView);
 
@@ -416,9 +410,14 @@ export class AddonComponent implements OnInit {
         });
     }
 
-    onSaveNewProfileClicked(event: string): void {
-        console.log(`save new profile was clicked for id - ${event} `);
-        const profileId: number = coerceNumberProperty(event);
-        this.createNewSlugsDataViewForProfile(profileId);
+    onSaveProfileClicked(event: IPepProfileDataViewSaveClickEvent): void {
+        console.log(`save profile was clicked for id - ${event.profileId} `);
+        const profileId: number = coerceNumberProperty(event.profileId);
+
+        if (profileId > 0) {
+            const dataViewToCopyFrom = this.profileDataViewsList.find(p => p.profileId === event.copyFromProfileId)?.dataViews[0] || null;
+            const dataViewToOverride = this.profileDataViewsList.find(p => p.profileId === event.profileId)?.dataViews[0];
+            this.addonService.createSlugsDataView(profileId, dataViewToCopyFrom, dataViewToOverride);
+        }
     }
 }
