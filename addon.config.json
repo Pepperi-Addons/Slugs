@@ -23,10 +23,14 @@
     "Dependencies": {
       "webapp": "16.85.47",
       "pages": "0.7.1",
-      "cpi_node": "0.4.6"
+      "cpi_node": "0.4.6",
+      "pepperi_pack": "1.0.1"
     },
     "CPISide": [
       "addon-cpi.ts"
     ]
+  },
+  "AddonPackage": {
+    "ClientZip": false
   }
 }
