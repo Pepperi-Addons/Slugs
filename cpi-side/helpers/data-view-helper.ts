@@ -58,7 +58,7 @@ export class DataViewHelper {
     // ******** This function can be removed if the configurations 1.0 is installed ********
     // this function manipulates only the homepage slug behavior
     // we can override the homepage slug only if configurations 1.0 is installed (supported by open sync)
-    static async canOverrideLegacySlug(slug: string) {
+    static async canOverrideLegacySlug(slug: string): Promise<boolean> {
         if (slug.toLowerCase() !== 'homepage'){
             return true;
         }
