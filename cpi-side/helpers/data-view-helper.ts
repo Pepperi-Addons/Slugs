@@ -57,8 +57,8 @@ export class DataViewHelper {
 
     // this function manipulates only the homepage slug behavior
     // we can override the homepage slug only if configurations 1.0 is installed (supported by open sync)
-    static async canOverrideLegacySlug(slug) {
-        if (slug !== 'homepage'){
+    static async canOverrideLegacySlug(slug: string) {
+        if (slug.toLowerCase() !== 'homepage'){
             return true;
         }
         // check if configurations 1.0 is installed by checking if it's schema exists
